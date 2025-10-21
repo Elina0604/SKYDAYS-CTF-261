@@ -1,0 +1,35 @@
+services:
+  app:
+    image: "jc21/nginx-proxy-manager:latest"
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "81:81"
+    environment:
+      # Postgres parameters:
+      DB_POSTGRES_HOST: "db"
+      DB_POSTGRES_PORT: "5432"
+      DB_POSTGRES_USER: "dbuser"
+      DB_POSTGRES_PASSWORD: "tB&Tx8&7ghG8&D"
+      DB_POSTGRES_NAME: "dbuser"
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    depends_on:
+      - db
+    networks:
+      - shared
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: "dbuser"
+      POSTGRES_PASSWORD: "tB&Tx8&7ghG8&D"
+      POSTGRES_DB: "dbuser"
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+
+networks:
+  shared:
+    external: true
