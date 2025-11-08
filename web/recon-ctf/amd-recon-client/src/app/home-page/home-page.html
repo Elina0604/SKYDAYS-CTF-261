@@ -1,0 +1,32 @@
+<div class="container">
+  <div *ngFor="let q of questions; let i = index" class="question-block">
+    <p>{{ q.id }}. {{ q.question }}</p>
+
+    <div class="input-group">
+      <input 
+        #answerInput
+        type="text"
+        [disabled]="!isActive(i) || (q.isCorrect ?? false)"
+        [(ngModel)]="q.answer"
+        [placeholder]="q.placeHolder"
+        [ngClass]="{
+          'input-correct': q.isCorrect === true,
+          'input-incorrect': q.isCorrect === false
+        }"
+      />
+
+      <button 
+        (click)="checkAnswer(i, answerInput.value)" 
+        [disabled]="!isActive(i) || q.isCorrect"
+      >
+        Kontrol Et
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="allCorrect()" class="flag-container">
+    <button (click)="getFlag()" [disabled]="flagLoading || (flag && flag != 'Hata oluştu')">Get Flag</button>
+
+    <p *ngIf="flag" class="flag-text">{{ flag }}</p>
+  </div>
+</div>

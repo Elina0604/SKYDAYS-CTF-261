@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  amd-recon-client:
+    build:
+      context: ./amd-recon-client
+      dockerfile: Dockerfile
+    container_name: amd-recon-client
+    ports:
+      - "4200:80"
+    networks:
+      - nginx-network
+
+  amd-recon-server:
+    build:
+      context: ./amd-recon-server
+      dockerfile: Dockerfile
+    container_name: amd-recon-server
+    ports:
+      - "5000:7106"
+    environment:
+      ASPNETCORE_URLS: "http://+:7106"
+    networks:
+      - nginx-network
+
+networks:
+  nginx-network:
+    driver: bridge
