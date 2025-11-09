@@ -16,6 +16,7 @@ def slot_cheater_ctf():
         isim = input("\nLütfen bir kullanıcı kodu girin (herhangi bir string olabilir): ")
         seed_input = sum(ord(char) for char in isim)
         seed_degeri = seed_input % 256
+        print(f"\nDEBUG: Girilen kullanıcı kodunun seed'i: {seed_degeri}")  # <-- EKLEDİK
     except Exception:
         print("Geçersiz giriş. Oyun sonlandırıldı.")
         return
@@ -23,8 +24,10 @@ def slot_cheater_ctf():
     random.seed(seed_degeri)
     KAZANMA_SAYISI = 7
     KAZANMA_CEVIRMESI = 3
+    tur = 0
 
     while bakiye > 0 and bakiye < 1000:
+        tur += 1
         print(f"\n💰 Mevcut Bakiyeniz: ${bakiye}")
         try:
             bahis = int(input("🎰 Bahis miktarınızı girin (1-10$): "))
@@ -42,8 +45,7 @@ def slot_cheater_ctf():
         for _ in range(KAZANMA_CEVIRMESI):
             sayi = random.randint(1, 9)
             sonuclar.append(sayi)
-
-        print(f"Çevirme Sonucu: {sonuclar}")
+        print(f"DEBUG: {tur}. tur sonucu: {sonuclar}")  # <-- EKLEDİK
 
         if sonuclar == [KAZANMA_SAYISI] * KAZANMA_CEVIRMESI:
             kazanc = bahis * 100
