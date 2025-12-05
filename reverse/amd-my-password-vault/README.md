@@ -4,7 +4,7 @@
 
 ### Çözüm
 
-    * Yarışmacı "file amd-my-password-vault-linux-x64" komutu (windows'da DIE-engine) ile .exe'nin hangi C#/.Net ile yazıldığını öğrenir.
+    * Yarışmacı DIE-engine ile .exe'nin hangi C#/.Net ile yazıldığını öğrenir.
     * .Net için Reverse Engineering tool'u olan ILSpy'ı kullanarak .exe içeriğine bakar.
     * .exe içindeki "encryptedPassword" değişkenini ve kullanıcının girdiği şifre verisinin ToBase64 ile şifrelendiğini görür. (Compile/Decompile durumuna göre değişken olarak değil direk if koşulu içinde olabilir)
     * CyberChef'de FromBase64 ile "encryptedPassword" içeriğini çözer.
