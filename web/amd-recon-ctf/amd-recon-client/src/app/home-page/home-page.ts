@@ -26,6 +26,13 @@ export class HomePage {
     this.loadAnswers();
   }
 
+  downloadWordlist() {
+    const link = document.createElement('a');
+    link.href = 'custom_wordlist.txt';
+    link.download = 'custom_wordlist.txt';
+    link.click();
+  }
+
   async checkAnswer(index: number, answer: string) {
     const question = this.questions[index];
     const userAnswer = answer.trim();

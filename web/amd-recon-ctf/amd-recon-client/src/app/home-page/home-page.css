@@ -65,6 +65,32 @@ button:disabled {
     cursor: not-allowed;
 }
 
+.download-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  margin-left: 8px;
+
+  background: green;
+  border-radius: 6px;
+
+  font-size: 18px;
+  font-weight: bold;
+
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  border: 1px solid #d4d4d4;
+}
+
+.download-icon:active {
+  transform: scale(0.92);
+}
+
 .flag-container {
   margin-top: 20px;
   text-align: center;
