@@ -1,6 +1,7 @@
 ### Yarışmacıya Verilecek Bilgiler/Dosyalar
 
     * /Executables altındaki 2 adet dosya
+    * Programın yazıldığı framework'ün en son versiyonunun kullanıldığı bilgisi
 
 ### Yarışmacıya Verilebilecek İpuçları
     * exe tipini anlamak için DIE-engine'i binary ayarda kullan (Maliyet: ~%10)
