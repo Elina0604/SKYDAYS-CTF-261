@@ -14,7 +14,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $filename = $file["name"];
         $contents = file_get_contents($file["tmp_name"]);
 
-        // Uploads dizinini kontrol et ve oluştur
         if (!is_dir('./uploads/')) {
             mkdir('./uploads/', 0755, true);
         }
@@ -272,7 +271,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <strong>Status:</strong> All systems operational. No issues detected.
                 </div>
 
-                <!-- Uploaded files list -->
                 <div class="file-list">
                     <h3>Recently Uploaded Files</h3>
                     <?php
