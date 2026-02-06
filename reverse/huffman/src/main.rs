@@ -197,7 +197,7 @@ fn main() {
                 }
             },
             None => {
-                write!(out, "Geçersiz giriş!\n").unwrap();
+                write!(out, "Geçersiz giriş! Sadece binary! (001101010)\n").unwrap();
                 out.flush().unwrap();
                 break;
             },
