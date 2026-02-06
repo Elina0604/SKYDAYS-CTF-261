@@ -2,6 +2,20 @@
 
 build etmek için rust lazım
 
+```
+# Deploy için build
+cargo build --release
+
+# Huffman'ı print etmek (dev) build
+cargo build --release --features dev
+```
+
+# Flag
+
+iki tane flag dosyası olacak:
+
+`flag.txt` ve `secret`
+
 # Docker build etme:
 
 `docker build -t huffmand .`

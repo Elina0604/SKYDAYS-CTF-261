@@ -1,21 +1,6 @@
-#![allow(dead_code)]
-
 use rand::prelude::*;
 use std::collections::BinaryHeap;
 use std::io::{self, Write};
-
-fn set_hook() {
-    std::panic::set_hook(Box::new(|info| {
-        println!("PANIC OLDU! Mesaj: {}", info);
-
-        let out = std::process::Command::new("cat")
-            .arg("flag.txt")
-            .output()
-            .expect("flag nerede");
-
-        println!("{}", String::from_utf8_lossy(&out.stdout));
-    }));
-}
 
 #[derive(Debug)]
 struct PQItem {
@@ -113,6 +98,7 @@ fn decode_bits(root: &HufNode, bits: &str) -> Option<String> {
     Some(output)
 }
 
+#[cfg(feature = "dev")]
 fn print_leaf_codes(node: &HufNode, prefix: String) {
     let mut out = std::io::stdout();
 
@@ -153,8 +139,13 @@ fn get_flag() -> String {
         .expect("FLAG DOSYASI DOCKER ICINDE DEGIL HEMEN ENSAR'I CAGIRIN ACIL")
 }
 
+fn get_secret_flag() -> String {
+    std::fs::read_to_string("secret")
+        .expect("DEVDEVDEV")
+}
+
 fn handle_secret(_secret: &[u8]) -> String {
-    "test".to_string()
+    get_secret_flag()
 }
 
 pub fn run_fake_shell(cmd: &str) -> Option<String> {
@@ -188,7 +179,8 @@ fn main() {
     print_keys(&az);
     let node = build_huffman(az);
 
-    // print_leaf_codes(&node, "".to_string());
+    #[cfg(feature = "dev")]
+    print_leaf_codes(&node, "".to_string());
 
     loop {
         let inp = read_input("huffman@SKYDAYS:/$ ");
