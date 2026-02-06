@@ -11,8 +11,6 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-deathstar}
       MYSQL_CHARACTER_SET_SERVER: utf8mb4
       MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
-    ports:
-      - "${MYSQL_EXTERNAL_PORT:-3306}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -53,8 +51,8 @@ services:
       API_HOST: ${API_HOST:-0.0.0.0}
       API_PORT: ${API_PORT:-8000}
       API_PREFIX: ${API_PREFIX:-/api}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-["http://localhost:3000","http://frontend:3000"]}
+      FRONTEND_URL: ${FRONTEND_URL:-https://order66.skydays.ctf}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-["https://order66.skydays.ctf","http://order66.skydays.ctf","http://localhost:3000","http://frontend:3000"]}
       
       # Security Configuration
       SECRET_KEY: ${SECRET_KEY:-execute-order-66-the-empire-strikes-back}
@@ -90,8 +88,9 @@ services:
       HEALTH_CHECK_INTERVAL: ${HEALTH_CHECK_INTERVAL:-30}
       HEALTH_CHECK_TIMEOUT: ${HEALTH_CHECK_TIMEOUT:-5}
       HEALTH_CHECK_RETRIES: ${HEALTH_CHECK_RETRIES:-3}
-    ports:
-      - "${BACKEND_PORT:-8000}:8000"
+    # Remove direct port mapping - nginx will handle routing
+    # ports:
+    #   - "${BACKEND_PORT:-8000}:8000"
     volumes:
       - ./backend/app:/app/app:ro
     networks:
@@ -113,15 +112,16 @@ services:
       args:
         - NODE_VERSION=${NODE_VERSION:-20}
         - NGINX_VERSION=${NGINX_VERSION:-1.24}
-        - VITE_API_URL=${VITE_API_URL:-http://localhost:8000/api}
+        - VITE_API_URL=${VITE_API_URL:-https://order66.skydays.ctf/api}
         - VITE_DEV_MODE=${VITE_DEV_MODE:-false}
     container_name: order66_frontend
     restart: unless-stopped
     environment:
       NGINX_HOST: ${NGINX_HOST:-localhost}
       NGINX_PORT: ${NGINX_PORT:-80}
-    ports:
-      - "${FRONTEND_PORT:-3000}:80"
+    # Remove direct port mapping - nginx will handle routing
+    # ports:
+    #   - "${FRONTEND_PORT:-3000}:80"
     networks:
       - order66_network
     depends_on:
@@ -132,6 +132,30 @@ services:
       retries: 3
       interval: 30s
       start_period: 30s
+
+  # Nginx Reverse Proxy Service
+  nginx:
+    image: nginx:1.24-alpine
+    container_name: order66_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    networks:
+      - order66_network
+    depends_on:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      timeout: 10s
+      retries: 3
+      interval: 30s
+      start_period: 20s
 
 # Named Volumes
 volumes:
