@@ -17,8 +17,8 @@ class Program
             List<(string, string)> passwordData =
             [
                 ("Google", "aRr/AIuxrngAtaEMRuo4OQ=="),
-                ("Modem", "QpbYWmpiG8oawyoyfKbmfBixB9dMMhqC/sPru7SxYPo="),
-                ("Flag", "Hekk2Tp7QUJUz9H+AVzKybYyBxAwpPOisA8LfkB8Uy7Dc0zQwS9Kd+PVAFWYpLAl"),
+                ("Modem", "aRr/AIuxrngAtaEMRuo4OQ=="),
+                ("Flag", "5RK7L+8Sn25EpQ3QaYEkXa0hBX+rrqYG7rGmR0kJik6QTbXpksxk4AWSDomUZJ1i"),
                 ("THM", "aRr/AIuxrngAtaEMRuo4OQ=="),
                 ("HTB", "aRr/AIuxrngAtaEMRuo4OQ==")
             ];
