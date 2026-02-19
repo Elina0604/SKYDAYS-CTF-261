@@ -6,7 +6,7 @@ namespace amd_recon_server.Services;
 
 public class PowService
 {
-    private readonly string _secretKey = "CTF_Gizli_Anahtar_Buraya";
+    private readonly string _secretKey = "7E09B1D63375614BB1D42488C5647A5665ABCB65F3C9F1BB6F292B65C01DA17E";
 
     public (string salt, string signature) GenerateChallenge()
     {
