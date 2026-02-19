@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Question } from '../models/Question';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, NgFor } from '@angular/common';
+import { PowService } from '../services/PowService';
 
 @Component({
   selector: 'app-home-page',
@@ -19,9 +20,12 @@ export class HomePage {
 
   currentQuestionIndex: number = 0;
   flag: string | null = null;
+  answerLoading = false;
   flagLoading = false;
 
-  constructor() {
+  baseUrl = 'http://localhost:5000/api/Answer';
+
+  constructor(private powService: PowService) {
     this.loadAnswers();
   }
 
@@ -31,21 +35,34 @@ export class HomePage {
 
     if(!this.isFormatCorrect(userAnswer, question.placeHolder)){
       question.isCorrect = false;
+      this.saveAnswers();
+      return;
     }
-    else{
-      const isCorrect = await this.verifyAnswerBackend(question.id, userAnswer);
-      
-      if (isCorrect) {
-        question.answer = userAnswer; 
-        question.isCorrect = true;
-        if (this.currentQuestionIndex === index) {
-          this.currentQuestionIndex++;
-        }
-      } else {
-        question.isCorrect = false;
-      }
+    
+    this.answerLoading = true;
+
+    const challenge = await this.getChallenge();
+    if(challenge == null){
+      window.alert("Challenge okunamadı. CTF ekibinden biri ile iletişime geçiniz");
+      this.saveAnswers();
+      this.answerLoading = false;
+      return;
     }
 
+    const nonce = await this.powService.solve(challenge.salt, userAnswer);
+
+    const isCorrect = await this.verifyAnswerBackend(question.id, userAnswer, challenge.salt, challenge.signature, challenge.difficulty, nonce);  
+    if (isCorrect) {
+      question.answer = userAnswer; 
+      question.isCorrect = true;
+      if (this.currentQuestionIndex === index) {
+        this.currentQuestionIndex++;
+      }
+    } else {
+      question.isCorrect = false;
+    }
+
+    this.answerLoading = false;
     this.saveAnswers();
   }
 
@@ -116,13 +133,24 @@ export class HomePage {
     return true;
   }
 
-  async verifyAnswerBackend(questionId: number, answer: string): Promise<boolean> {
-    const backendUrl = 'http://localhost:5000/api/Answer/SendAnswer';
+  async getChallenge(): Promise<any> {
+    const backendUrl = `${this.baseUrl}/GetChallenge`;
+    try {
+      const res = await fetch(backendUrl);
+      return await res.json();
+    } 
+    catch {
+      return null;
+    }
+  }
+  
+  async verifyAnswerBackend(questionId: number, answer: string, salt: string, signature: string, difficulty: number, nonce: number): Promise<boolean> {
+    const backendUrl = `${this.baseUrl}/SendAnswer`;
     try {
       const res = await fetch(backendUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: questionId, answer })
+        body: JSON.stringify({ id: questionId, answer: answer, salt: salt, signature: signature, difficulty: difficulty, nonce: nonce})
       });
 
       if (res.status === 200) return true;
@@ -137,10 +165,19 @@ export class HomePage {
   async getFlag() {
     this.flagLoading = true;
     this.flag = null;
-    const backendUrl = 'http://localhost:5000/api/Answer/GetFlag';
-    try {
-      const payload = this.questions.map(q => ({ id: q.id, answer: q.answer }));
 
+    const challenge = await this.getChallenge();
+    if(challenge == null){
+      window.alert("Challenge okunamadı. CTF ekibinden biri ile iletişime geçiniz");
+      this.saveAnswers();
+      return;
+    }
+
+    const nonce = await this.powService.solve(challenge.salt, this.questions[0].answer);
+
+    const backendUrl = `${this.baseUrl}/GetFlag`;
+    try {
+      const payload = this.questions.map(q => ({ id: q.id, answer: q.answer, salt: challenge.salt, signature: challenge.signature, difficulty: challenge.difficulty, nonce: nonce }));
       const res = await fetch(backendUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -15,10 +15,7 @@
         }"
       />
 
-      <button 
-        (click)="checkAnswer(i, answerInput.value)" 
-        [disabled]="!isActive(i) || q.isCorrect"
-      >
+      <button *ngIf="!answerLoading" (click)="checkAnswer(i, answerInput.value)" [disabled]="!isActive(i) || q.isCorrect || answerLoading">
         Kontrol Et
       </button>
     </div>
