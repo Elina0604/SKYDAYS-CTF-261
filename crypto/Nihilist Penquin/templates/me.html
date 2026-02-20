@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1 class="title">Me</h1>
+  <button onclick="loadMe()">/api/me</button>
+  <pre id="out"></pre>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadMe(){
+  const r = await api("/api/me")
+  out.textContent = pretty(r.data)
+}
+loadMe()
+</script>
+{% endblock %}

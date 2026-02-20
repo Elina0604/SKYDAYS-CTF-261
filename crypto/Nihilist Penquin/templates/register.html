@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1 class="title">Register</h1>
+
+  <div class="row">
+    <label>Username</label>
+    <input id="u">
+    <label>Password</label>
+    <input id="p" type="password">
+    <button onclick="doRegister()">Register</button>
+  </div>
+
+  <pre id="out">{}</pre>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function doRegister(){
+  const r = await api("/api/register","POST",{
+    username:u.value,password:p.value
+  })
+  out.textContent = pretty(r.data)
+}
+</script>
+{% endblock %}

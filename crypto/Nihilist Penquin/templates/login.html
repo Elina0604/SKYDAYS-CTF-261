@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1 class="title">Login</h1>
+
+  <div class="row">
+    <label>Username</label>
+    <input id="u">
+    <label>Password</label>
+    <input id="p" type="password">
+    <button onclick="doLogin()">Login</button>
+  </div>
+
+  <pre id="tok">(token yok)</pre>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function doLogin(){
+  const r = await api("/api/login","POST",{
+    username:u.value,password:p.value
+  })
+  if(r.data.token){
+    setToken(r.data.token)
+    tok.textContent = r.data.token
+  }
+}
+</script>
+{% endblock %}

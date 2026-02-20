@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1 class="title">Admin</h1>
+  <button onclick="loadFlag()">Flag al</button>
+  <pre id="out"></pre>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadFlag(){
+  const r = await api("/api/admin/flag")
+  out.textContent = pretty(r.data)
+}
+</script>
+{% endblock %}
