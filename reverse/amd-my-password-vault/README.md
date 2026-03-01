@@ -8,6 +8,7 @@
 
 ### Çözüm
 
+	* Yarışmacı DIE ile .NET Framework olduğunu keşfeder
     * Yarışmacı SingleFileExtractor ile exe dosyasını açar
     * .Çıktılar arasından amd-my-password-vault.dll dosyasını DnSpy ile inceler
     * .exe içindeki "encryptedPassword" değişkenini ve kullanıcının girdiği şifre verisinin ToBase64 ile şifrelendiğini görür. (Compile/Decompile durumuna göre değişken olarak değil direk if koşulu içinde olabilir)
