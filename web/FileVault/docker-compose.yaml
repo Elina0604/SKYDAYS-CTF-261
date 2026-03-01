@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  file-vault-client:
+    build:
+      context: ./FileVault.Client
+      dockerfile: Dockerfile
+    container_name: file_vault_client
+    ports:
+      - "4200:80"
+    networks:
+      - nginx-network
+  file-vault-server:
+    build:
+      context: ./FileVault.Server
+      dockerfile: Dockerfile
+    container_name: file_vault_server
+    restart: unless-stopped
+    depends_on:
+      file-vault-db:
+        condition: service_healthy
+    ports:
+      - "5000:7106"
+    environment:
+      - ASPNETCORE_URLS=http://+:7106
+      - Jwt__PrivateKeyPath=/app/secrets/jwt_private_key.pem
+      - Jwt__PublicKeyPath=/app/secrets/jwt_public_key.pem
+      - Db__ConnectionString=Host=file_vault_db;Port=5432;Database=FileVaultDb;Username=postgres;Password=12345
+    volumes:
+      - C:/Users/amd/Desktop/secrets/production_jwt_private_key.pem:/app/secrets/jwt_private_key.pem:ro
+      - C:/Users/amd/Desktop/secrets/production_jwt_private_key.pem:/app/secrets/jwt_public_key.pem:ro
+    networks:
+      - nginx-network
+      
+  file-vault-db:
+    image: postgres:18-alpine
+    container_name: file_vault_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: FileVaultDb
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - file_vault_postgres_data:/var/lib/postgresql/data
+    networks:
+      - nginx-network
+
+volumes:
+  file_vault_postgres_data:
+
+networks:
+  nginx-network:
+    driver: bridge

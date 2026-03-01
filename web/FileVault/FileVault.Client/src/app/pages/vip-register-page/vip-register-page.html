@@ -1,0 +1,49 @@
+<div class="register-page-container vip-theme">
+    <div class="register-container vip-border">
+        <div class="register-header">
+            <div class="vip-badge-top">PREMIUM ACCESS</div>
+            <h2>VIP Kasa Oluştur</h2>
+            <p>5GB kota ve uçtan uca şifreleme avantajıyla başlayın.</p>
+        </div>
+
+        <form class="register-form" [formGroup]="vipRegisterForm" (ngSubmit)="onSubmit()">
+            <div class="input-group">
+                <label for="userName">Kullanıcı Adı</label>
+                <input type="text" id="userName" formControlName="userName" placeholder="Örn: vip_commander"/>
+                @if(vipRegisterForm.get('userName')?.touched && vipRegisterForm.get('userName')?.invalid) {
+                    <div class="error-message">
+                        @if(vipRegisterForm.get('userName')?.errors?.['required']) { <span>Kullanıcı adı gerekli.</span> }
+                        @if(vipRegisterForm.get('userName')?.errors?.['pattern']) { <span>Geçersiz karakter formatı.</span> }
+                    </div>
+                }
+            </div>
+
+            <div class="input-group">
+                <label for="password">Şifre</label>
+                <input type="password" id="password" formControlName="password" placeholder="••••••••"/>
+                @if(vipRegisterForm.get('password')?.touched && vipRegisterForm.get('password')?.invalid) {
+                    <div class="error-message">Şifre en az 6 karakter olmalıdır.</div>
+                }
+            </div>
+
+            <div class="input-group">
+                <label for="confirmPassword">Şifre Tekrar</label>
+                <input type="password" id="confirmPassword" formControlName="confirmPassword" placeholder="••••••••"/>
+                @if(vipRegisterForm.get('confirmPassword')?.touched && vipRegisterForm.hasError('passwordMismatch')) {
+                    <div class="error-message">Şifreler birbiriyle eşleşmiyor.</div>
+                }
+            </div>
+
+            <div class="info-box vip-info">
+                <span class="info-icon">💎</span>
+                <span>Anında <strong>5GB Depolama</strong> ve <strong>AES-256</strong> aktif edilecek.</span>
+            </div>
+
+            <button class="register-btn vip-btn" type="submit" [disabled]="vipRegisterForm.invalid">VIP Üyeliği Başlat</button>
+            
+            <p class="footer-link">
+                Zaten bir hesabın var mı? <a routerLink="/login">Giriş Yap</a>
+            </p>
+        </form>
+    </div>
+</div>

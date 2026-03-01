@@ -1,0 +1,92 @@
+<div class="vault-container">
+    <div class="storage-section glass">
+        <div class="storage-info">
+            <span>Depolama Alanı</span>
+            <span class="storage-text"><strong>{{usedSpaceAsMB}} MB</strong> / 25 MB</span>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-fill" 
+                 [style.width.%]="(usedSpaceAsMB / 25) * 100"
+                 [class.danger]="usedSpaceAsMB > 20">
+            </div>
+        </div>
+        @if(usedSpaceAsMB <= 25){
+            <p class="vip-note">VIP üyeliğe geçerek kotanızı 5GB'a yükseltebilirsiniz.</p>
+        }
+    </div>
+
+    <div class="file-list-section glass">
+        <div class="section-header">
+            <h3>Dosyalarım</h3>
+            <button class="upload-btn" (click)="openUploadModal()">
+                <span class="icon">+</span> Yeni Dosya Yükle
+            </button>
+
+            @if(isModalOpen){
+                <div class="modal-overlay" >
+                    <div class="modal-content glass">
+                        <div class="modal-header">
+                            <h3>Dosya Yükle</h3>
+                            <button class="close-btn" (click)="closeUploadModal()">✕</button>
+                        </div>
+                        
+                        <div class="modal-body">
+                            <div class="file-drop-zone" (click)="fileInput.click()">
+                                <input type="file" #fileInput (change)="onFileSelected($event)" hidden 
+                                    accept=".pdf,.png">
+                                
+                                <div class="upload-icon">📁</div>
+                                @if(!selectedFile){
+                                    <p>Dosyayı seçmek için tıklayın</p>
+                                }
+                                @else {
+                                    <p class="selected-name">{{selectedFile.name}}</p>
+                                }
+                               
+                                <small>İzin verilenler: .pdf, .png</small>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button class="action-btn" (click)="closeUploadModal()">Vazgeç</button>
+                            <button class="upload-confirm-btn" [disabled]="!selectedFile" (click)="onUpload()">
+                                Yüklemeyi Başlat
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <table class="file-table">
+            <thead>
+                <tr>
+                    <th>Dosya İsmi</th>
+                    <th class="actions-column"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (fileName of myFileNames; track fileName) {
+                    <tr>
+                        <td class="file-name">
+                            <span class="file-icon">📄</span> {{fileName}}
+                        </td>
+                        <td class="actions-cell">
+                            <button class="action-btn download" title="İndir" (click)="onDownload(fileName)">
+                                📥 <span class="btn-text">İndir</span>
+                            </button>
+                            <button class="action-btn delete" title="Sil" (click)="onDelete(fileName)">
+                                🗑️ <span class="btn-text">Sil</span>
+                            </button>
+                        </td>
+                    </tr>
+                }
+                @if (myFileNames.length === 0) {
+                    <tr>
+                        <td colspan="2" class="empty-msg">Henüz dosya yüklenmemiş.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

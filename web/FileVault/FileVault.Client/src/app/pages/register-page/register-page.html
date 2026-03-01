@@ -1,0 +1,55 @@
+<div class="register-page-container">
+    <div class="register-container">
+        <div class="register-header">
+            <h2>Yeni Kasa Oluştur</h2>
+            <p>Dosyalarınızı sistemimizde güvenle saklayın.</p>
+        </div>
+
+        <form class="register-form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            <div class="input-group">
+                <label for="userName">Kullanıcı Adı</label>
+                <input type="text" id="userName" formControlName="userName" placeholder="Örn: siber_uzman"/>
+                @if(registerForm.get('userName')?.touched && registerForm.get('userName')?.invalid) {
+                    <div class="error-message">
+                        @if(registerForm.get('userName')?.errors?.['required']) {
+                            <span>Kullanıcı adı en az 6 karakter olmalıdır.</span>
+                        }
+                        @if(registerForm.get('userName')?.errors?.['pattern']) {
+                            <span>Sadece ingilizce küçük harf, rakam ve '_' kullanılabilir.</span>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div class="input-group">
+                <label for="password">Şifre</label>
+                <input type="password" id="password" formControlName="password" placeholder="••••••••"/>
+                @if(registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
+                    <div class="error-message">Şifre en az 6 karakter olmalıdır.</div>
+                }
+            </div>
+
+            <div class="input-group">
+                <label for="confirmPassword">Şifre Tekrar</label>
+                <input type="password" id="confirmPassword" formControlName="confirmPassword" placeholder="••••••••"/>
+                
+                @if(registerForm.get('confirmPassword')?.touched && registerForm.hasError('passwordMismatch')) {
+                    <div class="error-message">
+                        <span>Şifreler birbiriyle eşleşmiyor.</span>
+                    </div>
+                }
+            </div>
+
+            <div class="info-box">
+                <span class="info-icon">ℹ</span>
+                <span>Varsayılan olarak <strong>Standart Plan (25MB)</strong> atanacaktır.</span>
+            </div>
+
+            <button class="register-btn" type="submit" [disabled]="registerForm.invalid">Hesap Oluştur</button>
+            
+            <p class="footer-link">
+                Zaten bir hesabın var mı? <a routerLink="/login">Giriş Yap</a>
+            </p>
+        </form>
+    </div>
+</div>

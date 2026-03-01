@@ -1,0 +1,15 @@
+<div class="navbar-container glass">
+    <div class="left-section">
+        <img ngSrc="/assets/skylab.png" (click)="routeToMainPage()" alt="Logo" height="40" width="40" priority class="logo">
+        <span class="title">FILE<span class="vault-text">VAULT</span></span>
+    </div>
+
+    <div class="btn-container">
+        @if (isLoggedIn) {
+            <button (click)="onLogout()" class="nav-btn logout">Çıkış Yap</button>
+        } 
+        @else {
+            <button [routerLink]="['/login']" class="nav-btn login">Giriş Yap</button>
+        }
+    </div>
+</div>

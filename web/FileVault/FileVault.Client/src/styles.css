@@ -1,0 +1,44 @@
+:root {
+  --primary: #6366f1; /* Modern İndigo */
+  --vip-gold: #fbbf24; /* VIP Sarısı */
+  --bg-dark: #0f172a; /* Gece Mavisi Arkaplan */
+  --glass-bg: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --transition: all 0.3s ease;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at top right, #1e293b, #0f172a);
+  color: var(--text-main);
+  min-height: 100vh;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.page-container {
+  width: 100%;
+  max-width: 1200px;
+}
+

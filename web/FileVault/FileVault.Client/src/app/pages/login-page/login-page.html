@@ -1,0 +1,11 @@
+<div class="login-page-container">
+    <div class="login-container">
+        <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <label for="userName">Kullanıcı Adı</label>
+            <input type="text" id="userName" formControlName="userName" placeholder="Kullanıcı adınızı girin"/>
+            <label for="password">Şifre</label>
+            <input type="password" id="password" formControlName="password" placeholder="••••••••"/>
+            <button class="green-btn" type="submit" [disabled]="loginForm.invalid">Giriş Yap</button>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,29 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar {
+  height: 8vh;
+  flex-shrink: 0;
+  color: white;
+  background-color: #121e2d;
+}
+
+.footer {
+  height: 7vh;
+  flex-shrink: 0;
+  color: white;
+  background-color: #121e2d;
+}
+
+.content-container {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.page-container{
+  width: 100%;
+}
