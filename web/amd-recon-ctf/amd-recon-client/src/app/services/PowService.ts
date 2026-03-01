@@ -10,7 +10,7 @@ export class PowService {
       const data = salt + answer + nonce;
       const hash = await this.generateHash(data);
 
-      if (hash.startsWith('00000') && '01234567'.includes(hash[5])) {
+      if (hash.startsWith('0000') && '01234567'.includes(hash[4])) {
         return nonce;
       }
 

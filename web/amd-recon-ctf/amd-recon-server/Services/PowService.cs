@@ -16,18 +16,18 @@ public class PowService
     }
 
     public bool Verify(AnswerDto dto, string answerForValidation)
-    {
-        if (dto.Signature != CreateSignature(dto.Salt)) return false;
+	{
+		if (dto.Signature != CreateSignature(dto.Salt)) return false;
 
-        var input = dto.Salt + answerForValidation + dto.Nonce;
-        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
-        var hashString = Convert.ToHexString(hashBytes).ToLower();
+		var input = dto.Salt + answerForValidation + dto.Nonce;
+		var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
+		var hashString = Convert.ToHexString(hashBytes).ToLower();
 
-        if (!hashString.StartsWith("00000")) return false;
+		if (!hashString.StartsWith("0000")) return false;
 
-        char sixthChar = hashString[5];
-        return "01234567".Contains(sixthChar);
-    }
+		char fifthChar = hashString[4];
+		return "01234567".Contains(fifthChar);
+	}
 
     private string CreateSignature(string salt)
     {
