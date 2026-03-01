@@ -23,7 +23,7 @@ export class HomePage {
   answerLoading = false;
   flagLoading = false;
 
-  baseUrl = 'http://localhost:5000/api/Answer';
+  baseUrl = 'http://recon.skydays.ctf/api/Answer';
 
   constructor(private powService: PowService) {
     this.loadAnswers();
