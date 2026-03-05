@@ -8,8 +8,44 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEMPLATE_ZONE="${SCRIPT_DIR}/db.domain.tld"
 TMP_BACKUP_DIR="/tmp/bind9-tui-backups-$(date +%s)"
+BIND_DIR=""
+
+cleanup() {
+  local exit_code=$?
+  if [ -n "$TMP_BACKUP_DIR" ] && [ -d "$TMP_BACKUP_DIR" ]; then
+    rm -rf "$TMP_BACKUP_DIR" 2>/dev/null || true
+  fi
+  rm -f /tmp/named-checkzone.out 2>/dev/null || true
+  exit $exit_code
+}
+trap cleanup EXIT INT TERM
 
 err() { echo "ERROR: $*" >&2; }
+
+validate_domain() {
+  local domain="$1"
+  if [[ ! "$domain" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$ ]]; then
+    return 1
+  fi
+  return 0
+}
+
+validate_ip() {
+  local ip="$1"
+  if [[ "$ip" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+    local IFS='.'
+    read -ra OCTETS <<< "$ip"
+    for octet in "${OCTETS[@]}"; do
+      if (( octet > 255 )); then
+        return 1
+      fi
+    done
+    return 0
+  elif [[ "$ip" =~ ^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$ ]] || [[ "$ip" == "::1" ]]; then
+    return 0
+  fi
+  return 1
+}
 
 command_exists() { command -v "$1" >/dev/null 2>&1; }
 
@@ -30,7 +66,7 @@ ensure_deps() {
 backup() {
   mkdir -p "$TMP_BACKUP_DIR"
   if [ -e "$1" ]; then
-    cp -a "$1" "$TMP_BACKUP_DIR/" || true
+    cp -a "$1" "$TMP_BACKUP_DIR/" || err "Failed to backup $1"
   fi
 }
 
@@ -40,7 +76,6 @@ find_zone_file() {
     echo ""
     return
   fi
-  # crude parse: look for zone "name" then file "..."
   local file
   file=$(awk "/zone[[:space:]]+\"${domain}\"/{f=1} f && /file/{gsub(/.*file[[:space:]]*\"|\".*/,"",\$0); print; exit}" "$named_local" || true)
   echo "$file"
@@ -48,7 +83,7 @@ find_zone_file() {
 
 add_zone_stanza() {
   local domain="$1" zonefile="$2" named_local="$3"
-  if grep -qP "zone[[:space:]]+\"${domain}\"" "$named_local" 2>/dev/null; then
+  if grep -qE "zone[[:space:]]+\"${domain}\"" "$named_local" 2>/dev/null; then
     whiptail --msgbox "Zone stanza for ${domain} already exists in ${named_local}." 8 60
     return 1
   fi
@@ -66,11 +101,10 @@ EOF
 create_zone_from_template() {
   local target="$1" domain="$2" ip_ns="$3" ip_at="$4"
   if [ -f "$TEMPLATE_ZONE" ]; then
-    cp "$TEMPLATE_ZONE" "$target"
-    sed -i.bak -e "s|<gateway-ip>|${ip_ns}|g" -e "s|<target-host-ip>|${ip_at}|g" "$target" 2>/dev/null || true
+    cp "$TEMPLATE_ZONE" "$target" || { err "Failed to copy template"; return 1; }
+    sed -i.bak -e "s|<gateway-ip>|${ip_ns}|g" -e "s|<target-host-ip>|${ip_at}|g" "$target" 2>&1 | while read -r line; do err "sed warning: $line"; done || true
     rm -f "${target}.bak" || true
   else
-    # minimal fallback
     cat >"$target" <<EOF
 $TTL 86400
 @   IN  SOA ns.${domain}. admin.${domain}. (
@@ -85,14 +119,13 @@ ns  IN  A   ${ip_ns}
 @   IN  A   ${ip_at}
 EOF
   fi
-  chmod 644 "$target" || true
+  chmod 644 "$target" || err "Failed to set permissions on $target"
 }
 
 increment_serial() {
   local zonefile="$1"
-  # prefer YYYYMMDDNN (10 digits)
   local serial
-  serial=$(grep -oE '[0-9]{10}' "$zonefile" | head -n1 || true)
+  serial=$(grep -oE '[0-9]{8}[0-9]{2}' "$zonefile" | head -n1 || true)
   if [ -n "$serial" ]; then
     local today=$(date +%Y%m%d)
     local prefix=${serial:0:8}
@@ -104,17 +137,20 @@ increment_serial() {
     else
       local newserial="${today}01"
     fi
-    # replace first occurrence
-    awk -v s="$serial" -v n="$newserial" ' { if (!r && index($0,s)) {sub(s,n); r=1} print }' "$zonefile" >"${zonefile}.new" && mv "${zonefile}.new" "$zonefile"
+    local escaped_serial=$(printf '%s' "$serial" | sed 's/[][.*^$/\\&]/\\&/g')
+    local escaped_newserial=$(printf '%s' "$newserial" | sed 's/[][.*^$/\\&]/\\&/g')
+    sed -i.bak "s/${escaped_serial}/${escaped_newserial}/" "$zonefile" && rm -f "${zonefile}.bak"
     return 0
   fi
-  # fallback: increment first numeric token appearing near SOA
   serial=$(awk '/SOA/{p=1;next} p && /;/{exit} p{for(i=1;i<=NF;i++) if ($i ~ /^[0-9]+$/) {print $i; exit}}' "$zonefile" | head -n1 || true)
   if [ -n "$serial" ]; then
     local newserial=$((serial + 1))
-    awk -v s="$serial" -v n="$newserial" ' { if (!r && index($0,s)) {sub(s,n); r=1} print }' "$zonefile" >"${zonefile}.new" && mv "${zonefile}.new" "$zonefile"
+    local escaped_serial=$(printf '%s' "$serial" | sed 's/[][.*^$/\\&]/\\&/g')
+    local escaped_newserial=$(printf '%s' "$newserial" | sed 's/[][.*^$/\\&]/\\&/g')
+    sed -i.bak "s/${escaped_serial}/${escaped_newserial}/" "$zonefile" && rm -f "${zonefile}.bak"
     return 0
   fi
+  err "Could not find serial number in $zonefile"
   return 1
 }
 
@@ -131,27 +167,76 @@ add_record() {
   fi
   line="$line IN $type $value"
   echo "$line" >>"$zonefile"
-  increment_serial "$zonefile" || true
+  increment_serial "$zonefile" || err "Failed to increment serial"
+}
+
+reload_bind_service() {
+  local svc_name=""
+  local try_sudo="${1:-false}"
+  
+  if command_exists systemctl; then
+    for svc in bind9 named; do
+      if $try_sudo; then
+        if sudo systemctl is-active "$svc" >/dev/null 2>&1; then
+          svc_name="$svc"
+          break
+        fi
+      else
+        if systemctl is-active "$svc" >/dev/null 2>&1; then
+          svc_name="$svc"
+          break
+        fi
+      fi
+    done
+    
+    if [ -n "$svc_name" ]; then
+      if $try_sudo; then
+        sudo systemctl reload "$svc_name" && return 0 || return 1
+      else
+        systemctl reload "$svc_name" && return 0 || return 1
+      fi
+    fi
+    
+    if $try_sudo; then
+      for svc in bind9 named; do
+        if sudo systemctl reload "$svc" 2>/dev/null; then
+          return 0
+        fi
+      done
+    else
+      for svc in bind9 named; do
+        if systemctl reload "$svc" 2>/dev/null; then
+          return 0
+        fi
+      done
+    fi
+  fi
+  
+  if command_exists service; then
+    service bind9 reload 2>/dev/null && return 0
+    service named reload 2>/dev/null && return 0
+  fi
+  
+  return 1
 }
 
 validate_zone_and_reload() {
   local domain="$1" zonefile="$2" named_local="$3"
-  if ! named-checkconf -z 2>/dev/null; then
-    whiptail --title "named-checkconf" --msgbox "named-checkconf reported problems. Inspect /etc/bind/*" 10 60
-    return 1
-  fi
   if ! named-checkzone "$domain" "$zonefile" >/tmp/named-checkzone.out 2>&1; then
     local out; out=$(cat /tmp/named-checkzone.out)
     whiptail --title "named-checkzone failed" --msgbox "$out" 12 70
     return 1
   fi
   if whiptail --yesno "Validation OK. Reload bind9 now?" 8 60; then
-    if command_exists systemctl; then
-      systemctl reload bind9 && whiptail --msgbox "bind9 reloaded" 6 40 || whiptail --msgbox "Reload failed" 8 50
+    if reload_bind_service; then
+      whiptail --msgbox "bind9 reloaded" 6 40
+    elif reload_bind_service true; then
+      whiptail --msgbox "bind9 reloaded (with sudo)" 6 40
     else
-      whiptail --msgbox "systemctl not found. Reload manually." 8 50
+      whiptail --msgbox "Reload failed. Try manually: sudo systemctl reload bind9" 8 50
     fi
   fi
+  return 0
 }
 
 select_bind_dir() {
@@ -160,7 +245,7 @@ select_bind_dir() {
   BIND_DIR="$d"
   if [ ! -d "$BIND_DIR" ]; then
     if whiptail --yesno "${BIND_DIR} not found. Create?" 8 60; then
-      mkdir -p "$BIND_DIR"
+      mkdir -p "$BIND_DIR" || { err "Failed to create $BIND_DIR"; exit 1; }
     else
       err "Bind dir missing"; exit 1
     fi
@@ -172,8 +257,24 @@ flow_add_domain() {
   domain=$(whiptail --inputbox "Domain (example: example.tld)" 8 60 3>&1 1>&2 2>&3) || return
   domain=$(echo "$domain" | tr -d '[:space:]')
   [ -z "$domain" ] && whiptail --msgbox "No domain" 6 40 && return
+  
+  if ! validate_domain "$domain"; then
+    whiptail --msgbox "Invalid domain name: $domain" 8 50
+    return
+  fi
+  
   ip_ns=$(whiptail --inputbox "IP for ns.${domain}" 8 60 "127.0.0.1" 3>&1 1>&2 2>&3) || return
+  if ! validate_ip "$ip_ns"; then
+    whiptail --msgbox "Invalid IP address: $ip_ns" 8 50
+    return
+  fi
+  
   ip_at=$(whiptail --inputbox "IP for @ A record" 8 60 "$ip_ns" 3>&1 1>&2 2>&3) || return
+  if ! validate_ip "$ip_at"; then
+    whiptail --msgbox "Invalid IP address: $ip_at" 8 50
+    return
+  fi
+  
   zonefile="${BIND_DIR}/db.${domain}"
   zonefile=$(whiptail --inputbox "Zone file path" 8 70 "$zonefile" 3>&1 1>&2 2>&3) || return
   named_local="${BIND_DIR}/named.conf.local"
@@ -183,8 +284,17 @@ flow_add_domain() {
     fi
     backup "$zonefile"
   fi
-  create_zone_from_template "$zonefile" "$domain" "$ip_ns" "$ip_at"
-  add_zone_stanza "$domain" "$zonefile" "$named_local" || true
+  
+  if ! create_zone_from_template "$zonefile" "$domain" "$ip_ns" "$ip_at"; then
+    whiptail --msgbox "Failed to create zone file" 8 50
+    return
+  fi
+  
+  if ! add_zone_stanza "$domain" "$zonefile" "$named_local"; then
+    whiptail --msgbox "Failed to add zone stanza. Check permissions." 8 50
+    return
+  fi
+  
   whiptail --msgbox "Zone file created: ${zonefile}\nStanza appended to ${named_local}" 10 70
   validate_zone_and_reload "$domain" "$zonefile" "$named_local"
 }
@@ -194,6 +304,12 @@ flow_add_subdomain() {
   domain=$(whiptail --inputbox "Zone (domain) to modify (example: skydays.ctf)" 8 60 3>&1 1>&2 2>&3) || return
   domain=$(echo "$domain" | tr -d '[:space:]')
   [ -z "$domain" ] && whiptail --msgbox "No domain" 6 40 && return
+  
+  if ! validate_domain "$domain"; then
+    whiptail --msgbox "Invalid domain name: $domain" 8 50
+    return
+  fi
+  
   named_local="${BIND_DIR}/named.conf.local"
   zonefile=$(find_zone_file "$domain" "$named_local")
   if [ -z "$zonefile" ]; then
@@ -202,8 +318,18 @@ flow_add_subdomain() {
       if whiptail --yesno "Zonefile does not exist. Create minimal zone file?" 8 60; then
         local ip
         ip=$(whiptail --inputbox "IP for @ and ns" 8 60 "127.0.0.1" 3>&1 1>&2 2>&3) || return
-        create_zone_from_template "$zonefile" "$domain" "$ip" "$ip"
-        add_zone_stanza "$domain" "$zonefile" "$named_local" || true
+        if ! validate_ip "$ip"; then
+          whiptail --msgbox "Invalid IP address: $ip" 8 50
+          return
+        fi
+        if ! create_zone_from_template "$zonefile" "$domain" "$ip" "$ip"; then
+          whiptail --msgbox "Failed to create zone file" 8 50
+          return
+        fi
+        if ! add_zone_stanza "$domain" "$zonefile" "$named_local"; then
+          whiptail --msgbox "Failed to add zone stanza. Check permissions." 8 50
+          return
+        fi
       else
         whiptail --msgbox "Cancelled" 6 40; return
       fi
@@ -213,8 +339,18 @@ flow_add_subdomain() {
   name=$(whiptail --inputbox "Record name (subdomain). Use @ for apex" 8 60 "www" 3>&1 1>&2 2>&3) || return
   type=$(whiptail --menu "Record type" 12 50 5 A "A (IPv4)" AAAA "AAAA" CNAME "CNAME" TXT "TXT" MX "MX" 3>&1 1>&2 2>&3) || return
   case "$type" in
-    A) val=$(whiptail --inputbox "IPv4 for ${name}.${domain}" 8 60 "10.0.0.2" 3>&1 1>&2 2>&3) || return ;;
-    AAAA) val=$(whiptail --inputbox "IPv6 for ${name}.${domain}" 8 60 "::1" 3>&1 1>&2 2>&3) || return ;;
+    A) val=$(whiptail --inputbox "IPv4 for ${name}.${domain}" 8 60 "10.0.0.2" 3>&1 1>&2 2>&3) || return
+       if ! validate_ip "$val"; then
+         whiptail --msgbox "Invalid IPv4 address: $val" 8 50
+         return
+       fi
+       ;;
+    AAAA) val=$(whiptail --inputbox "IPv6 for ${name}.${domain}" 8 60 "::1" 3>&1 1>&2 2>&3) || return
+       if ! validate_ip "$val"; then
+         whiptail --msgbox "Invalid IPv6 address: $val" 8 50
+         return
+       fi
+       ;;
     CNAME) val=$(whiptail --inputbox "CNAME target (fully qualified)" 8 60 "target.${domain}." 3>&1 1>&2 2>&3) || return ;;
     TXT) val=$(whiptail --inputbox "TXT content" 8 60 "hello" 3>&1 1>&2 2>&3) || return ;;
     MX) val=$(whiptail --inputbox "MX (priority target) e.g. 10 mail.${domain}." 10 70 "10 mail.${domain}." 3>&1 1>&2 2>&3) || return ;;
@@ -250,7 +386,6 @@ main_menu() {
   done
 }
 
-# start
 ensure_deps
 select_bind_dir
 mkdir -p "$TMP_BACKUP_DIR"
