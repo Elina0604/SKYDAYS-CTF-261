@@ -2,11 +2,11 @@ import axios from 'axios'
 import type { AxiosInstance, AxiosResponse, AxiosError } from 'axios'
 
 // API Configuration with runtime detection
+// Uses relative path /api which gets proxied through nginx
 const getApiBaseUrl = (): string => {
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-  }
-  return `${window.location.protocol}//${window.location.host}/api`;
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) return envUrl;
+  return '/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
