@@ -1,40 +1,32 @@
 # docker-compose.override.yml
 # Local development overrides - automatically loaded by docker-compose
+# WARNING: Only uncomment sections when needed for development
 version: '3.8'
 
 services:
-  # MySQL - expose port for direct database access during development
-  mysql:
-    ports:
-      - "3306:3306"
-    environment:
-      # Development-friendly settings
-      MYSQL_ROOT_PASSWORD: emperor
-      MYSQL_DATABASE: empire_todos
-      MYSQL_USER: vader
-      MYSQL_PASSWORD: deathstar
+  # MySQL - uncomment for direct database access during development
+  # mysql:
+  #   ports:
+  #     - "3306:3306"
 
-  # Backend - expose port for direct API access during development
-  backend:
-    ports:
-      - "8000:8000"
-    environment:
-      # Development settings
-      DEBUG: "true"
-      LOG_LEVEL: debug
-      FRONTEND_URL: "http://localhost:3000"
-      ALLOWED_ORIGINS: '["http://localhost:3000","http://frontend:3000","http://localhost:5173"]'
-      
-  # Frontend - expose port for direct access during development
-  frontend:
-    ports:
-      - "3000:80"
-    environment:
-      # Keep dev mode flag available
-      VITE_DEV_MODE: "true"
+  # Backend - uncomment for direct API access during development
+  # backend:
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     DEBUG: "true"
+  #     LOG_LEVEL: debug
+  #     FRONTEND_URL: "http://localhost:3000"
+  #     ALLOWED_ORIGINS: '["http://localhost:3000","http://frontend:3000","http://localhost:5173"]'
 
-  # Nginx - add development-friendly settings
+  # Frontend - uncomment for direct access during development
+  # frontend:
+  #   ports:
+  #     - "3000:80"
+  #   environment:
+  #     VITE_DEV_MODE: "true"
+
+  # Nginx - development settings
   nginx:
     environment:
-      # Development settings if needed
       NGINX_HOST: localhost
