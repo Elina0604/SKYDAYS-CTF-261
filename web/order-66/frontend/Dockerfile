@@ -6,11 +6,9 @@ FROM oven/bun:1-alpine as builder
 
 # Set build arguments
 ARG NODE_VERSION=20
-ARG VITE_API_URL=http://localhost:8000/api
 ARG VITE_DEV_MODE=false
 
 # Set environment variables for build
-ENV VITE_API_URL=${VITE_API_URL}
 ENV VITE_DEV_MODE=${VITE_DEV_MODE}
 ENV NODE_ENV=production
 
