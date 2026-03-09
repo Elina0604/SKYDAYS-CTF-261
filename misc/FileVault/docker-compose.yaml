@@ -27,8 +27,8 @@ services:
       - Jwt__PublicKeyPath=/app/secrets/jwt_public_key.pem
       - Db__ConnectionString=Host=file_vault_db;Port=5432;Database=FileVaultDb;Username=postgres;Password=12345
     volumes:
-      - C:/Users/amd/Desktop/secrets/production_jwt_private_key.pem:/app/secrets/jwt_private_key.pem:ro
-      - C:/Users/amd/Desktop/secrets/production_jwt_private_key.pem:/app/secrets/jwt_public_key.pem:ro
+      - ./secrets/production_jwt_private_key.pem:/app/secrets/jwt_private_key.pem:ro
+      - ./secrets/production_jwt_private_key.pem:/app/secrets/jwt_public_key.pem:ro
     networks:
       - nginx-network
       

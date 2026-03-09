@@ -19,13 +19,7 @@ public sealed class FlagInitializerService : IHostedService
 
         List<string> logLines = [];
         logLines.Add("Admin's files encrypted with EncryptJson method in EncryptionHelper.cs");
-        logLines.Add("Encryption parameters: " +
-            "vaultPayload.Kek.Salt: KxayAaLsegldnK2LtQAIMA== " +
-            "vaultPayload.Kek.Nonce: /SDTkpTZgse75Nwm " +
-            "vaultPayload.Kek.Ciphertext: ZyuU5vgwET38PZ6ZEDiltioy1IM3r8HJfK+z4eL4UqU= " +
-            "vaultPayload.Kek.Tag: BlcS2NrzFt2gQ+PqroqbLA== " +
-            "vaultPayload.Data.Nonce: gXJeTajmZfcKqA5o " +
-            "vaultPayload.Data.Tag: Fey8T8QVwlGJzNHsuGSs/w==");
+        logLines.Add("Encryption parameters: vaultPayload.Kek.Salt: 4e54mbq+jXaJR4bYUy0WXw== | vaultPayload.Kek.Nonce: NfBvO3NLUFjfQvNx | vaultPayload.Kek.Ciphertext: 1xoSssAD0iOTs+Dy7eIOJNUCer5fPgLbD2XvMXSR3d0= | vaultPayload.Kek.Tag: HmfNUlJbD4NZM+FnKGWhNg== | vaultPayload.Data.Nonce: 0oR2AMBH4sLuNVop | vaultPayload.Data.Tag: ON8Dh8zpuCVUhzpVoHxtzA==");
         logLines.Add("Delete this file before production");
 
         string fullLog = string.Join(Environment.NewLine, logLines);
@@ -34,7 +28,7 @@ public sealed class FlagInitializerService : IHostedService
 
         fileService.CreateVIPUserFolder("admin");
 
-        var flagTxtContext = "EQ7+9IJnxw+4cWOLpdEwoEa1hpNgUjMfP1mBGKFoCD2ukxrLijPP7MQ0JKjpyOWo";
+        var flagTxtContext = "3GdNhCMfJhrNwY7XgkINsKFOvE4mwlMtKFHFy5QL8dGRxqQPAH4uuY3u2NM4gxW7";
         using MemoryStream flagStream = new(Encoding.UTF8.GetBytes(flagTxtContext));
         fileService.SaveVIP("admin", flagStream, "flag.txt");
     }
