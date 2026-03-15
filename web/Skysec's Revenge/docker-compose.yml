@@ -1,0 +1,11 @@
+services:
+    revenge-skydays:
+        container_name: revenge-skydays
+        build: .
+        networks:
+            - ctf-network
+        restart: unless-stopped
+        image: revenge-skydays
+networks:
+    ctf-network:
+        external: true

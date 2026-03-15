@@ -45,4 +45,4 @@ Metadata verilerini dökün: exiftool final_sonuclari.jpg
 Bulduğunuz ipuçlarını kullanarak dosyaları ayıklayın!
 
 🏆 Final Bayrağı (Flag)
-Final flag formatı: SKYDAYS{y0u_p4ss3d_th3_3x4m}
+Final flag formatı: SKYDAYS{y0u_p4ss3d_th3_ex4m}

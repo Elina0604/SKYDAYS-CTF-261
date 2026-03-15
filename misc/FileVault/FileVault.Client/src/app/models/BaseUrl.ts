@@ -1,1 +1,1 @@
-export const baseUrl: string = "http://filevault.skydays.ctf/api";
+export const baseUrl: string = "https://filevault.skydays.ctf/api";

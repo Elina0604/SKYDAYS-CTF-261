@@ -87,14 +87,28 @@ public class FileController : ControllerBase
         var userFolderSizeAsMB = _fileService.GetUserFolderSizeAsMB(userName);
         if (userFolderSizeAsMB > 25) return BadRequest("VIP olmayan kullanıcılar 25 MB sınırını aşamaz");
 
-        var tmpFileName = FileNameGenerator.Generate(user.UserName.Value, parts[0]);
-        using (var uploadStream = file.OpenReadStream())
+        using var uploadStream = file.OpenReadStream();
+
+        // Checks if file is realy a png or pdf
+        var isFileHarmfulFromFormat = await _fileContentControlService.IsFileHarmfulFromFormat(uploadStream);
+
+        // Checks if it is a command other then ls/cat
+        var isFileHarmfulFromContent = await _fileContentControlService.IsFileHarmfulFromContent(uploadStream);
+        if (isFileHarmfulFromFormat && isFileHarmfulFromContent) // It might be a reverse shell or etc. So we don't save it
         {
-            _fileService.SaveTmp(tmpFileName, uploadStream);
+            return BadRequest("Dosya içeriği zaralı olduğu tespit edildiği için kaydedilmedi.");
         }
 
-        if (await _fileContentControlService.IsFileHarmful(tmpFileName))
+        // Checkpoint: It is pdf/png or ls/cat command file
+
+        // Save to tmp
+        var tmpFileName = FileNameGenerator.Generate(user.UserName.Value, parts[0]);
+        _fileService.SaveTmp(tmpFileName, uploadStream);
+
+        if (isFileHarmfulFromFormat) // It is ls/cat file
         {
+            // Delay for allowing contestant to run the file
+            await Task.Delay(500);
             var deletedFile = _fileService.DeleteTmp(tmpFileName);
             int storageIndex = deletedFile.IndexOf(@"\Storage", StringComparison.OrdinalIgnoreCase);
             if (storageIndex != -1) deletedFile = deletedFile[storageIndex..];

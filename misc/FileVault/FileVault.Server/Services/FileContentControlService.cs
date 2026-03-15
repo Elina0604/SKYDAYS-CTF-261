@@ -9,43 +9,33 @@ namespace FileVault.Server.Services;
 
 internal sealed class FileContentControlService : IFileContentControlService
 {
-    private readonly IFileService _fileService;
-    private readonly IFileFormatInspector _inspector;
+    private readonly FileFormatInspector _inspector;
+    private static readonly string[] AllowedCommands = { "cat", "ls", "base64" };
 
-    private static readonly string[] DangerousKeywords =
+    public FileContentControlService()
     {
-        "eval", "exec", "passthru", "shell_exec", "popen", "proc_open", "pcntl_exec",
-        "Invoke-Expression", "IEX", "Start-Process", "DownloadString",
-        "python", "perl", "ruby", "gcc", "php",
-        "nc ", "netcat", "ncat", "/dev/tcp", "/dev/udp",
-        "bash", "sh ", "zsh", "csh",
-        "base64_decode", "str_rot13", "gzinflate"
-    };
-
-    public FileContentControlService(IFileService fileService)
-    {
-        _fileService = fileService;
         _inspector = new FileFormatInspector([new Pdf(), new Png()]);
     }
 
-    public async Task<bool> IsFileHarmful(string tmpFileName)
+    public async Task<bool> IsFileHarmfulFromContent(Stream stream)
     {
         try
         {
-            using var stream = _fileService.ReadTmpFile(tmpFileName);
             stream.Position = 0;
+            using var reader = new StreamReader(stream, leaveOpen: true);
+            string content = await reader.ReadToEndAsync();
+            return !ValidateOnlyAllowedCommands(content);
+        }
+        catch
+        {
+            return true;
+        }
+    }
 
-            // Yarışmacı kolayca shell alamasın diye basit kontroller
-            using (var reader = new StreamReader(stream, leaveOpen: true))
-            {
-                string content = await reader.ReadToEndAsync();
-                if (CheckDangerousPatterns(content)) return true;
-            }
-
-            // Bekleme (Kullanıcı zararlı dosyayı çalıştırabilsin diye)
-            await Task.Delay(500);
-
-            // Zararlı dosya kalıcı dizine gitmesin
+    public async Task<bool> IsFileHarmfulFromFormat(Stream stream)
+    {
+        try
+        {
             stream.Position = 0;
             var format = _inspector.DetermineFileFormat(stream);
             if (format == null) return true;
@@ -82,31 +72,20 @@ internal sealed class FileContentControlService : IFileContentControlService
         }
     }
 
-    private static bool CheckDangerousPatterns(string content)
+    private static bool ValidateOnlyAllowedCommands(string content)
     {
-        foreach (var keyword in DangerousKeywords)
+        if (string.IsNullOrWhiteSpace(content)) return true;
+
+        char[] dangerousChars = { ';', '&', '|', '>', '<', '`', '$', '\\', '\n', '\r' };
+        if (content.Any(c => dangerousChars.Contains(c))) return false;
+
+        var words = content.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        foreach (var word in words)
         {
-            if (content.Contains(keyword, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
+            if (AllowedCommands.Contains(word.ToLower())) continue;
+            if (!Regex.IsMatch(word, @"^(\.\.?\/|[a-zA-Z0-9_\-\/])+$")) return false;
         }
 
-        if (Regex.IsMatch(content, @"(system|passthru|shell_exec|exec|eval)\s*\(", RegexOptions.IgnoreCase))
-        {
-            return true;
-        }
-
-        if (Regex.IsMatch(content, @"<script|javascript:|onload=|onerror=", RegexOptions.IgnoreCase))
-        {
-            return true;
-        }
-
-        if (Regex.IsMatch(content, @"[a-zA-Z0-9+/]{40,}==", RegexOptions.Compiled))
-        {
-            return true;
-        }
-
-        return false;
+        return true;
     }
 }

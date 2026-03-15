@@ -2,5 +2,6 @@
 
 public interface IFileContentControlService
 {
-    Task<bool> IsFileHarmful(string tmpFileName);
+    Task<bool> IsFileHarmfulFromContent(Stream stream);
+    Task<bool> IsFileHarmfulFromFormat(Stream sream);
 }

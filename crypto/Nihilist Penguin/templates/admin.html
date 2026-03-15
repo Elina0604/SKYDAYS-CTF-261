@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='assets/style.css') }}">
+</head>
+<body>
+<div class="bg-penguin">
+  <svg class="g1" viewBox="0 0 200 200" fill="currentColor"><ellipse cx="100" cy="130" rx="55" ry="60"/><ellipse cx="100" cy="55" rx="40" ry="35"/><circle cx="85" cy="50" r="4" fill="#0a0a0f"/><circle cx="115" cy="50" r="4" fill="#0a0a0f"/><ellipse cx="100" cy="58" rx="8" ry="4" fill="#0a0a0f"/></svg>
+  <svg class="g2" viewBox="0 0 200 200" fill="currentColor"><ellipse cx="100" cy="130" rx="55" ry="60"/><ellipse cx="100" cy="55" rx="40" ry="35"/><circle cx="85" cy="50" r="4" fill="#0a0a0f"/><circle cx="115" cy="50" r="4" fill="#0a0a0f"/><ellipse cx="100" cy="58" rx="8" ry="4" fill="#0a0a0f"/></svg>
+  <svg class="g3" viewBox="0 0 200 200" fill="currentColor"><ellipse cx="100" cy="130" rx="55" ry="60"/><ellipse cx="100" cy="55" rx="40" ry="35"/><circle cx="85" cy="50" r="4" fill="#0a0a0f"/><circle cx="115" cy="50" r="4" fill="#0a0a0f"/><ellipse cx="100" cy="58" rx="8" ry="4" fill="#0a0a0f"/></svg>
+</div>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><span class="brand-text">🐧 NIHILIST PENGUIN</span></div>
+    <div class="nav">
+      <a href="/">Home</a>
+      <a href="/register">Register</a>
+      <a href="/login">Login</a>
+      <a href="/me">Me</a>
+      <a href="/admin">Admin</a>
+      <a href="/.well-known/public.pem">public.pem</a>
+    </div>
+  </div>
+
+  <div class="warning-banner">[ RESTRICTED AREA ]</div>
+
+  <div class="card restricted-card">
+    <div class="restricted-badge">ADMIN</div>
+    <h1 class="title restricted-title">RESTRICTED ZONE</h1>
+    <button class="danger-btn" onclick="loadFlag()">EXECUTE</button>
+    <pre id="out"></pre>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='assets/app.js') }}"></script>
+<script>
+async function loadFlag(){
+  const r = await api('/api/admin/flag')
+  out.textContent = pretty(r.data)
+}
+</script>
+</body>
+</html>
