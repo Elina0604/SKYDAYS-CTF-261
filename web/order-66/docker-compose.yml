@@ -1,3 +1,14 @@
+# ==============================================================================
+# Order 66: Execute the Query - CTF Challenge
+# Docker Compose Configuration
+# ==============================================================================
+#
+# For local development, create docker-compose.override.yml (see .env.example)
+# For production, set environment variables directly or use .env file
+#
+# Quick start: docker-compose up -d
+# ==============================================================================
+
 services:
   # MySQL Database Service
   mysql:
@@ -109,7 +120,6 @@ services:
       args:
         - NODE_VERSION=${NODE_VERSION:-20}
         - NGINX_VERSION=${NGINX_VERSION:-1.24}
-        - VITE_API_URL=${VITE_API_URL:-https://order66.skydays.ctf/api}
         - VITE_DEV_MODE=${VITE_DEV_MODE:-false}
     container_name: order66_frontend
     restart: unless-stopped

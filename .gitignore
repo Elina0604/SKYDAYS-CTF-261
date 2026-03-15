@@ -7,3 +7,5 @@
 .DS_Store
 node_modules
 .ruff_cache
+go/
+*.tar.gz
