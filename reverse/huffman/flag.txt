@@ -1,1 +1,1 @@
-SKYCTF{dilim_yandy_panik_oldm}
+SKYDAYS{dilim_yandy_panik_oldm}
