@@ -1,23 +1,26 @@
 #!/bin/bash
+SUBNET='10.19.11.0/24'
+USERS_SUBNET='10.19.11.128/25'
+CHALLANGES_SUBNET='10.19.11.0/29'
+OTHER_UTILS_SUBNET='10.19.11.8/29'
+SKY_SEC_SUBNET='10.19.11.32/27'
 
-sed -i.bak "s/IPV6=yes/IPV6=no/g" /etc/default/ufw
+iptables -F
+iptables -X
 
-ufw reset
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
 
-ufw default deny incoming
-ufw default allow outgoing
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -p udp --dport 51820 -j ACCEPT
 
-ufw allow ssh
-ufw allow from 10.0.0.0/16 to 10.0.0.0/16
-ufw allow from 10.0.0.0/16 to 10.10.0.0/16
-ufw allow from 10.10.0.0/16 to 10.0.0.0/16
-ufw deny from 10.10.0.0/16 to 10.10.0.0/16
-ufw allow 5000
-ufw allow 51820/udp
+iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-ufw reload
-
-ufw enable
+iptables -A FORWARD -s $SKY_SEC_SUBNET -j ACCEPT
+iptables -A FORWARD -s $OTHER_UTILS_SUBNET -d $USERS_SUBNET -j ACCEPT
+iptables -A FORWARD -s $CHALLANGES_SUBNET -d $USERS_SUBNET -j ACCEPT
+iptables -A FORWARD -s $USERS_SUBNET -d $USERS_SUBNET -j DROP
 
 # Wireguard Logs
 iptables -I FORWARD -i wg0 -j LOG --log-prefix 'tunnel wireguard iptables: ' --log-level 7
