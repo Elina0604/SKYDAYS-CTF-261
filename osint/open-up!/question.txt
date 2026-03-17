@@ -3,3 +3,5 @@
 Flag Formatı: 
 SKYDAYS{123-456-7890_9999} 
 SKYDAYS{santral-numarası_dahili}
+
+Uyarı: Güvenmediğiniz yerlerden dosya indirirken dikkatli olunuz. Sorumluluk kabul etmemekteyiz.
