@@ -2,7 +2,7 @@ flag: SKYDAYS{505-889-1300_1366}
 
 # Çözüm
 
-1. Olay, google'a yazıldığında DotGovs isimli bir twitter kullanıcısının şubat 2016'da yaklaşoık 20000 FBI ve 9000 DHS çalışanının iletişim bilgilerin sızdırdığı öğrenilir.
+1. Olay, google'a yazıldığında DotGovs isimli bir twitter kullanıcısının şubat 2016'da yaklaşoık 20000 FBI ve 9000 DHS çalışanının iletişim bilgilerini sızdırdığı öğrenilir.
 <img width="1295" height="862" alt="image" src="https://github.com/user-attachments/assets/e0ced605-b029-436a-ab92-c84ce6269e13" />
 
 2. Bu veriler arama motorlarında indexlenmediği için breaches & leaks arşiv sitelerini veya darknet forum sitelerine bakabiliriz.
