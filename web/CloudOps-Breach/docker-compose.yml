@@ -1,0 +1,8 @@
+services:
+    revenge-skydays:
+        container_name: revenge-skydays
+        build: .
+        ports:
+            - "8000:80"
+        restart: unless-stopped
+        image: revenge-skydays

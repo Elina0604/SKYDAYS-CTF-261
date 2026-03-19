@@ -1,0 +1,6 @@
+0000000000000000000000000000000000000000 061baf9b583be58405ad8054b05c7c9d130cb72b Alex Morgan <alex.morgan@cloudops.local> 1773904892 +0300	commit (initial): Initial commit
+061baf9b583be58405ad8054b05c7c9d130cb72b 066a4ec8c176d5e30588338db804096c1cf20539 Alex Morgan <alex.morgan@cloudops.local> 1773904892 +0300	commit: Update auth logic
+066a4ec8c176d5e30588338db804096c1cf20539 f62a9821e8a5c9dd3114c3c4470d612df52348a7 Alex Morgan <alex.morgan@cloudops.local> 1773904892 +0300	commit: Add database config
+f62a9821e8a5c9dd3114c3c4470d612df52348a7 b60b5837bed1866752400327d5d276800dddfa95 Alex Morgan <alex.morgan@cloudops.local> 1773904892 +0300	commit: Add README
+b60b5837bed1866752400327d5d276800dddfa95 bb91c15474032214df1a8bae8c5281c17dfd8161 Alex Morgan <alex.morgan@cloudops.local> 1773904892 +0300	commit: Add apache config
+bb91c15474032214df1a8bae8c5281c17dfd8161 fd8b475d2b52df85bf90ebdcd951d40429e1a86d Alex Morgan <alex.morgan@cloudops.local> 1773904892 +0300	commit: Remove hardcoded DB creds
