@@ -45,5 +45,5 @@
 - [order-66](web/order-66)
 
 ## Windows
-- [Mirage-FullPwn](Windows/Mirage-FullPwn)
+- [Mirage-FullPwn](Windows/Mirage-Fullpwn)
 
