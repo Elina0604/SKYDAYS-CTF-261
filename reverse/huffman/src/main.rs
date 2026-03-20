@@ -2,30 +2,7 @@ use rand::prelude::*;
 use std::collections::BinaryHeap;
 use std::io::{self, Write};
 
-#[derive(Debug)]
-struct PQItem {
-    weight: u32,
-    node: HufNode,
-}
-
-impl Ord for PQItem {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        other.weight.cmp(&self.weight)   // min-heap için ters
-    }
-}
-impl PartialOrd for PQItem {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-impl PartialEq for PQItem {
-    fn eq(&self, other: &Self) -> bool {
-        self.weight == other.weight
-    }
-}
-impl Eq for PQItem {}
-
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 enum HufNode {
     Leaf(char),
     Node(Box<HufNode>, Box<HufNode>),
@@ -46,6 +23,35 @@ impl HufKey {
         }
     }
 }
+
+#[derive(Debug)]
+struct PQItem {
+    weight: u32,
+        node: HufNode,
+}
+
+impl Ord for PQItem {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match other.weight.cmp(&self.weight) {
+            std::cmp::Ordering::Equal => other.node.cmp(&self.node),
+                ord => ord,
+        }
+    }
+}
+
+impl PartialOrd for PQItem {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for PQItem {
+    fn eq(&self, other: &Self) -> bool {
+        self.weight == other.weight && self.node == other.node
+    }
+}
+
+impl Eq for PQItem {}
 
 fn build_huffman(keys: Vec<HufKey>) -> HufNode {
     let mut heap = BinaryHeap::new();
@@ -88,7 +94,6 @@ fn decode_bits(root: &HufNode, bits: &str) -> Option<String> {
             }
         }
 
-        // Yaprak düğüme ulaştık
         if let HufNode::Leaf(c) = node {
             output.push(*c);
             node = root; // tekrar root'tan devam edilir
