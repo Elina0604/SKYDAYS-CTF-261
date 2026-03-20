@@ -1,18 +1,6 @@
-# SKYDAYS26 - Recon CTF
+# Recon
 
-## Kurulum
-
-1. **Klasöre Gir:**
-   ```sh
-   cd recon-ctf 
-   ```
-
-2. **Ayağa Kaldır:**
-   ```sh
-   docker compose up --build -d
-   ```
-
-## Çözüm
+### Çözüm
 
 1. **Ana Sayfa'ya git:**
    ```sh
