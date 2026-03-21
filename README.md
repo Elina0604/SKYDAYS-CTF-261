@@ -43,6 +43,7 @@
 - [CloudOps-Breach](web/CloudOps-Breach)
 - [amd-recon-ctf](web/amd-recon-ctf)
 - [order-66](web/order-66)
+- [Spatify](web/Spatify)
 
 ## Windows
 - [Mirage-FullPwn](Windows/Mirage-Fullpwn)
