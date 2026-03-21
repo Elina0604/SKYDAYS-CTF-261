@@ -1,17 +1,28 @@
-# Password Vault
+# Password Vault - CTF Challenge Dokumantasyonu
 
-### Yarışmacıya Verilecek Dosyalar
-    * /Executables altındaki dosya
+## 1. Soru Meta Verileri
 
-### Soru Açıklaması
-	* Windows'da çözülmesi tavsiye edilir
+**Soru Adi:** Password Vault
 
-### Yarışmacıya Verilebilecek İpuçları
+**Soru Aciklamasi:** Windows'da çözülmesi tavsiye edilir
+
+**Kategori:** Reverse
+
+**Zorluk:** Easy-Medium
+
+**Bayrak:** `SKYDAYS{5eluR-gnir3en1gn3-e5rev3R}`
+
+---
+
+## 2. Yarışmacıya Verilecek Dosyalar
+    /Executables altındaki amd-my-password-vault.exe dosyası
+
+## 3. Yarışmacıya Verilebilecek İpuçları
     * .exe içeriğine ulaşmak için SingleFileExtractor kullan (Maliyet: %35)
     * Elde ettiğin .dll dosyasını DnSpy ile incele (Maliyet: %30)
 
-### Çözüm
-
+## 4. Çözüm
+	* Video: https://drive.google.com/drive/folders/1UoWB8aE93xPvIwPt2QWSKykFjU_4g2FR?usp=sharing
 	* Yarışmacı DIE ile .NET Framework olduğunu keşfeder
     * Yarışmacı SingleFileExtractor ile exe dosyasını açar
     * .Çıktılar arasından amd-my-password-vault.dll dosyasını DnSpy ile inceler
