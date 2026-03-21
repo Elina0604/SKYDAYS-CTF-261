@@ -21,7 +21,10 @@
     * .exe içeriğine ulaşmak için SingleFileExtractor kullan (Maliyet: %35)
     * Elde ettiğin .dll dosyasını DnSpy ile incele (Maliyet: %30)
 
-## 4. Çözüm
+## 4. Çözüm Video
+[Drive](https://drive.google.com/drive/folders/1UoWB8aE93xPvIwPt2QWSKykFjU_4g2FR?usp=sharing)
+
+## 5. Çözüm
 	* Video: https://drive.google.com/drive/folders/1UoWB8aE93xPvIwPt2QWSKykFjU_4g2FR?usp=sharing
 	* Yarışmacı DIE ile .NET Framework olduğunu keşfeder
     * Yarışmacı SingleFileExtractor ile exe dosyasını açar
