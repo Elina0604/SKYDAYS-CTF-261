@@ -1,8 +1,12 @@
 services:
-    revenge-skydays:
-        container_name: revenge-skydays
-        build: .
-        ports:
-            - "8000:80"
-        restart: unless-stopped
-        image: revenge-skydays
+  CloudOps-Breach:
+    container_name: CloudOps-Breach
+    build: .
+    restart: unless-stopped
+    image: CloudOps-Breach
+    networks: 
+      - ctf-network
+
+networks: 
+  ctf-network:
+    external: true
