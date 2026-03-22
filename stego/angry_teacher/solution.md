@@ -57,4 +57,4 @@ Son adımda ortaya çıkan metin dosyasını okuyoruz:
 
 
 cat finalnotu.txt
-Flag: SKYDAYS{y0u_p4ss3d_th3_3x4m}
+Flag: SKYDAYS{y0u_p4ss3d_th3_ex4m}
