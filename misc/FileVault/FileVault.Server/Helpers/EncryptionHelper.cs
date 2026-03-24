@@ -6,9 +6,9 @@ namespace FileVault.Server.Helpers;
 
 internal sealed class EncryptionHelper
 {
-    public static VaultPayload EncryptJson(string plainJson, string password)
+    private static readonly string password = "k2-vgBTsy4oa03MB*Mu7";
+    public static VaultPayload EncryptJson(string plainJson)
     {
-        if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException("Password cannot be empty", nameof(password));
         return plainJson is null ? throw new ArgumentNullException(nameof(plainJson)) : CreateVault(plainJson, password);
     }
     public static VaultPayload CreateVault(string plainJson, string password)
