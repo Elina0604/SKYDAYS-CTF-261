@@ -105,7 +105,7 @@ public class FileController : ControllerBase
         var tmpFileName = FileNameGenerator.Generate(user.UserName.Value, parts[0]);
         _fileService.SaveTmp(tmpFileName, uploadStream);
 
-        if (isFileHarmfulFromFormat) // It is ls/cat file
+        if (isFileHarmfulFromFormat) // It is ls/cat/base64 file
         {
             // Delay for allowing contestant to run the file
             await Task.Delay(500);

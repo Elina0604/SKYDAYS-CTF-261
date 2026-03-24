@@ -2,7 +2,6 @@
 using FileSignatures.Formats;
 using FileVault.Server.Interfaces;
 using iText.Kernel.Pdf;
-using System.Text.RegularExpressions;
 using Image = SixLabors.ImageSharp.Image;
 
 namespace FileVault.Server.Services;
@@ -10,7 +9,11 @@ namespace FileVault.Server.Services;
 internal sealed class FileContentControlService : IFileContentControlService
 {
     private readonly FileFormatInspector _inspector;
-    private static readonly string[] AllowedCommands = { "cat", "ls", "base64" };
+    private static readonly string[] AllowedCommands = {
+        "cat Storage/VIP/admin/flag.txt", "cat Logs/logs.txt", " cat FileVault.Server.dll",
+        "ls", "ls Storage", "ls Storage/VIP", "ls Storage/VIP/admin", "ls -R Storage", "ls -R Logs",
+        "base64 FileVault.Server.dll"
+    };
 
     public FileContentControlService()
     {
@@ -24,7 +27,7 @@ internal sealed class FileContentControlService : IFileContentControlService
             stream.Position = 0;
             using var reader = new StreamReader(stream, leaveOpen: true);
             string content = await reader.ReadToEndAsync();
-            return !ValidateOnlyAllowedCommands(content);
+            return !IsCommandAllowed(content);
         }
         catch
         {
@@ -72,20 +75,9 @@ internal sealed class FileContentControlService : IFileContentControlService
         }
     }
 
-    private static bool ValidateOnlyAllowedCommands(string content)
+    private static bool IsCommandAllowed(string content)
     {
-        if (string.IsNullOrWhiteSpace(content)) return true;
-
-        char[] dangerousChars = { ';', '&', '|', '>', '<', '`', '$', '\\', '\n', '\r' };
-        if (content.Any(c => dangerousChars.Contains(c))) return false;
-
-        var words = content.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        foreach (var word in words)
-        {
-            if (AllowedCommands.Contains(word.ToLower())) continue;
-            if (!Regex.IsMatch(word, @"^(\.\.?\/|[a-zA-Z0-9_\-\/])+$")) return false;
-        }
-
-        return true;
+        if (string.IsNullOrWhiteSpace(content)) return false;
+        return AllowedCommands.Contains(content);
     }
 }
