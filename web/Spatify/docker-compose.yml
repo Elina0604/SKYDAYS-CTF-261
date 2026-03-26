@@ -1,0 +1,39 @@
+services:
+  # 1. VERİTABANI SERVİSİ (PostgreSQL)
+  db:
+    image: postgres:15
+    container_name: spatify_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: lucario
+      POSTGRES_DB: skydays
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    # Veritabanının gerçekten "hazır" olduğunu kontrol eder
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d skydays"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. UYGULAMA SERVİSİ (Node.js)
+  app:
+    build: .
+    container_name: spatify_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASSWORD: lucario
+      DB_DATABASE: skydays
+    # Sadece db konteyneri değil, db'nin içindeki servis hazır olunca başlar
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

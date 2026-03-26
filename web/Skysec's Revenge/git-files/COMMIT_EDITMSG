@@ -1,5 +1,0 @@
-Fix authentication bug - TODO: remove test credentials
-
-- Fixed strcmp() comparison issue
-- Need to review password validation
-- IMPORTANT: Change default credentials before production deploy

@@ -1,1 +1,3 @@
-https://github.com/NginxProxyManager/nginx-proxy-manager
+## Önemlli Bilgilendirme
+
+Web soruları tek bir Nginx üzerinden yönlendirmeli. HTTP(S) serivisi sayısını olabildiğince düşük tutmalı, mümünse 1 taneyle kısıtlamalısınız!

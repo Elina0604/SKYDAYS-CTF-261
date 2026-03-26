@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spatify Studio | Sanatçı Paneli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #121212; color: white; }
+        .spotify-green { color: #1DB954; }
+        .bg-spotify-green { background-color: #1DB954; }
+        .bg-spotify-card { background-color: #181818; }
+        .spotify-input { background-color: #282828; border: 1px solid transparent; color: white; }
+        .spotify-input:focus { border-color: #1DB954; background-color: #333; outline: none; }
+        .btn-spotify { transition: all 0.3s ease; }
+        .btn-spotify:hover { transform: scale(1.04); filter: brightness(1.1); }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+
+    <div class="bg-spotify-card p-10 rounded-2xl shadow-2xl w-full max-w-lg border border-[#282828]">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-black tracking-tighter italic">SPATİFY <span class="spotify-green">STUDIO</span></h1>
+            <p class="text-gray-500 font-bold mt-2 uppercase text-[10px] tracking-[0.2em]">Artist Upload Dashboard</p>
+        </div>
+
+        <% if (typeof error_mesaji !== 'undefined' && error_mesaji) { %>
+            <div class="bg-red-600/20 border border-red-600 text-red-500 p-4 rounded-lg mb-8 text-center text-sm font-bold animate-fade-in">
+                ❌ HATA: <%= error_mesaji %>
+            </div>
+        <% } %>
+
+        <% if (sonuc === "HAYIR") { %>
+            <div class="bg-red-500/20 border border-red-500 text-red-500 p-4 rounded-lg mb-8 text-center text-sm font-bold animate-fade-in">
+                ⚠️ UYGUN DEĞİL: Bu şarkı ismi zaten kullanılıyor!
+            </div>
+        <% } else if (sonuc === "EVET" && (typeof error_mesaji === 'undefined' || !error_mesaji)) { %>
+            <div class="bg-green-500/20 border border-spotify-green text-spotify-green p-4 rounded-lg mb-8 text-center text-sm font-bold animate-fade-in">
+                ✅ UYGUN: Şarkı başlığı onaylandı. Bilgileri tamamlayın.
+            </div>
+        <% } %>
+
+        <form action="/upload" method="POST" enctype="multipart/form-data" class="space-y-6">
+            
+            <div>
+                <label class="block text-[11px] font-black uppercase mb-2 tracking-widest text-gray-400">Şarkı Başlığı</label>
+                <input type="text" name="songName" required
+                value="<%= typeof songName !== 'undefined' ? songName : '' %>"
+                <% if (sonuc === "EVET") { %> 
+                    readonly 
+                    class="spotify-input w-full px-4 py-3 rounded-md focus:outline-none opacity-60 cursor-not-allowed border-spotify-green"
+                <% } else { %>
+                    class="spotify-input w-full px-4 py-3 rounded-md focus:outline-none"
+                <% } %>
+                placeholder="Eserin adı nedir?">
+    
+            <% if (sonuc === "EVET") { %>
+                <p class="text-[10px] text-gray-500 mt-1 italic">Başlık kilitlendi.</p>
+            <% } %>
+            </div>
+
+            <% if (sonuc === "EVET") { %>
+                <div class="space-y-6 animate-fade-in">
+                    
+                    <div>
+                        <label class="block text-[11px] font-black uppercase mb-2 tracking-widest text-gray-400">Sanatçı / Grup İsmi</label>
+                        <input type="text" name="artistName" required readonly
+                            value="<%= typeof loggedInUser !== 'undefined' ? loggedInUser : '' %>"
+                            class="spotify-input w-full px-4 py-3 rounded-md focus:outline-none opacity-60 cursor-not-allowed border-gray-600">
+                        <p class="text-[10px] text-spotify-green mt-1 italic font-bold">✓ Onaylanmış Sanatçı Profili</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-black uppercase mb-2 tracking-widest text-gray-400 text-[10px]">Ses (MP3/WAV)</label>
+                            <input type="file" name="songFile" required accept=".mp3,.wav"
+                                class="spotify-input w-full px-2 py-2 rounded-md text-[10px] text-gray-400 file:bg-spotify-green file:text-black file:font-bold file:border-0 file:rounded-full file:px-2 file:py-0.5 file:mr-2 cursor-pointer">
+                        </div>
+
+                        <div>
+                            <label class="block text-[11px] font-black uppercase mb-2 tracking-widest text-gray-400 text-[10px]">Kapak (JPG/PNG)</label>
+                            <input type="file" name="coverImage" required accept="image/*"
+                                class="spotify-input w-full px-2 py-2 rounded-md text-[10px] text-gray-400 file:bg-white file:text-black file:font-bold file:border-0 file:rounded-full file:px-2 file:py-0.5 file:mr-2 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <button type="submit" name="action" value="save"
+                        class="btn-spotify w-full bg-spotify-green text-black font-black py-4 rounded-full shadow-lg shadow-green-500/20 mt-4">
+                        ŞARKIYI YAYINLA
+                    </button>
+                </div>
+
+            <% } else { %>
+                <div class="space-y-4 animate-fade-in">
+                    <button type="submit" name="action" value="check"
+                        class="btn-spotify w-full bg-white text-black font-black py-4 rounded-full shadow-lg">
+                        UYGUNLUK SORGULA
+                    </button>
+                    
+                    <div class="px-2">
+                        <p class="text-xs text-gray-400 text-center leading-relaxed italic border-l-2 border-spotify-green pl-3">
+                            Şarkı isminiz <span class="text-gray-200">benzersiz</span> olmalıdır. Spatify özgünlüğe önem verdiği için diğer şarkı isimleriyle çakışan isimler kabul edilmemektedir.
+                        </p>
+                    </div>
+                </div>
+            <% } %>
+        </form>
+
+        <div class="mt-10 pt-6 border-t border-[#282828] text-center">
+            <a href="/home" class="text-[11px] font-black text-gray-500 hover:text-white transition-colors uppercase tracking-widest">
+                ← Stüdyodan Ayrıl ve Ana Sayfaya Dön
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

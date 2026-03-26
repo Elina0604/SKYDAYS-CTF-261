@@ -9,6 +9,8 @@ using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddOptions<JwtSettings>().BindConfiguration("Jwt").ValidateDataAnnotations().ValidateOnStart();
 builder.Services.AddOptions<DbSettings>().BindConfiguration("Db").ValidateDataAnnotations().ValidateOnStart();
 
@@ -50,6 +52,7 @@ app.UseCors("AllowAll");
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<AuthenticationMiddleware>();
+app.UseMiddleware<RateLimitingMiddleware>();
 
 app.UseAuthorization();
 

@@ -1,73 +1,43 @@
 #!/usr/bin/env python3
-from itertools import product
 
-xor_keys = [
-    0x1a, 0x69, 0xe5, 0x02,
-    0x91, 0xde, 0x66, 0x53,
-    0x3e, 0x77, 0xd4, 0x6a,
-    0x89, 0x93, 0x64, 0x54
-]
+def rotate_left(n, d):
+    d %= 8
+    return ((n << d) & 0xFF) | (n >> (8 - d))
 
-expected = [
-    73, 34, 203, 100, 208, 120, 83, 40,
-    117, 64, 184, 89, 240, 111, 10, 11,
-    231, 90, 136, 107, 227, 129, 97, 50,
-    212, 40, 160, 241, 223, 239, 80, 226,
-    118
-]
+def solve():
+    xor_keys = [0x1a, 0x69, 0xe5, 0x02, 0x91, 0xde, 0x66, 0x53, 0x3e, 0x77, 0xd4, 0x6a, 0x89, 0x93, 0x64, 0x54]
+    s_box = [0xc, 0x5, 0x6, 0xb, 0x9, 0x0, 0xa, 0xd, 0x3, 0xe, 0xf, 0x8, 0x4, 0x7, 0x1, 0x2]
+    
+    expected = [95, 149, 168, 69, 79, 184, 13, 51, 217, 44, 16, 182, 15, 28, 132, 156, 127, 41, 132, 102, 131, 61, 100, 192, 21, 157, 11, 246, 183, 253, 24, 18, 157]
 
-def rotl8(x, r):
-    r %= 8
-    return ((x << r) | (x >> (8 - r))) & 0xff
+    flag = ""
+    prev = 0xA5
+    
+    for i, target in enumerate(expected):
+        shift = (i % 5) + 1
+        key = xor_keys[i % 16]
+        found = False
+        
+        for char_code in range(256):
+            nc = (char_code ^ key ^ prev) & 0xFF
+            
+            high = nc >> 4
+            low = nc & 0x0F
+            nc_s = (s_box[high] << 4) | s_box[low]
+            
+            res = rotate_left(nc_s, shift)
+            res = (res + (0x37 ^ i)) & 0xFF
+            
+            if res == target:
+                flag += chr(char_code)
+                prev = target
+                found = True
+                break
+        
+        if not found:
+            flag += "?"
+            
+    print(f"Bulunan Flag: {flag}")
 
-def rotr8(x, r):
-    r %= 8
-    return ((x >> r) | (x << (8 - r))) & 0xff
-
-def forward_transform(byte, idx):
-    nc = byte ^ xor_keys[idx % 16]
-    shift = nc & 0xfc
-
-    if idx % 2 == 0:
-        nc = rotl8(nc, shift)
-    else:
-        nc = rotr8(nc, shift)
-
-    return nc
-
-# Her pozisyon için tüm mümkün byte'ları bul
-candidates = []
-
-for idx, target in enumerate(expected):
-    possible = []
-    for b in range(256):
-        if forward_transform(b, idx) == target:
-            possible.append(b)
-
-    if not possible:
-        print(f"[!] No solution at index {idx}")
-        exit()
-
-    candidates.append(possible)
-    print(f"[+] Index {idx}: {len(possible)} candidate(s)")
-
-print("\n[+] Combining candidates...")
-
-# Çok fazla kombinasyon çıkmasını önlemek için limit
-MAX_SOLUTIONS = 1000
-solutions_found = 0
-
-for combo in product(*candidates):
-    try:
-        s = bytes(combo).decode()
-    except:
-        continue  # printable olmayanları at
-
-    print("Possible flag:", s)
-    solutions_found += 1
-
-    if solutions_found >= MAX_SOLUTIONS:
-        print("[!] Limit reached.")
-        break
-
-print(f"\nTotal printed solutions: {solutions_found}")
+if __name__ == "__main__":
+    solve()

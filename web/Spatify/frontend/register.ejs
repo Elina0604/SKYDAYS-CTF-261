@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spatify | Kayıt Ol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #121212; color: white; }
+        .spotify-green { color: #1DB954; }
+        .bg-spotify-green { background-color: #1DB954; }
+        .bg-spotify-card { background-color: #181818; }
+        .spotify-input { background-color: #282828; border: 1px solid transparent; color: white; }
+        .spotify-input:focus { border-color: #1DB954; background-color: #333; outline: none; }
+        .btn-spotify { transition: all 0.3s ease; }
+        .btn-spotify:hover { transform: scale(1.04); filter: brightness(1.1); }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+
+    <div class="bg-spotify-card p-10 rounded-2xl shadow-2xl w-full max-w-md border border-[#282828]">
+        
+        <div class="text-center mb-10">
+            <div class="flex justify-center mb-4">
+                <svg viewBox="0 0 24 24" class="w-12 h-12 spotify-green fill-current"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.491 17.306c-.215.353-.674.464-1.026.249-2.857-1.745-6.453-2.14-10.686-1.171-.403.093-.81-.157-.903-.561-.093-.404.157-.811.561-.904 4.636-1.06 8.604-.61 11.805 1.345.352.215.464.674.249 1.026zm1.464-3.259c-.27.44-.847.58-1.287.31-3.27-2.01-8.254-2.592-12.12-1.417-.497.151-1.023-.129-1.174-.626-.151-.498.13-1.023.626-1.175 4.417-1.342 9.904-.693 13.645 1.603.44.27.58.847.31 1.288zm.139-3.413c-3.92-2.328-10.375-2.541-14.135-1.4c-.6.182-1.238-.158-1.419-.758-.182-.6.158-1.238.758-1.42 4.316-1.31 11.439-1.06 15.903 1.59.54.321.716 1.015.395 1.556-.321.54-1.015.716-1.556.394z"/></svg>
+            </div>
+            <h1 class="text-3xl font-black tracking-tighter italic">SPATİFY</h1>
+            <p class="text-gray-400 font-bold mt-2 text-sm uppercase tracking-widest">Ücretsiz Kayıt Ol</p>
+        </div>
+
+        <% if (typeof hatalar !== 'undefined' && hatalar.length > 0) { %>
+            <div class="bg-red-500/20 border border-red-500 text-red-500 p-4 rounded-lg mb-8 text-sm font-bold">
+                <% hatalar.forEach(function(hata) { %>
+                    <p class="flex items-center gap-2">⚠️ <%= hata.hata_mesaji %></p>
+                <% }); %>
+            </div>
+        <% } %>
+
+        <form action="/register" method="POST" class="space-y-4">
+            <div>
+                <label class="block text-[11px] font-black uppercase mb-1 tracking-widest text-gray-400">Kullanıcı Adı</label>
+                <input type="text" name="username" required
+                    class="spotify-input w-full px-4 py-2 rounded-md focus:outline-none"
+                    placeholder="İsminizi giriniz">
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-black uppercase mb-1 tracking-widest text-gray-400">E-Posta</label>
+                <input type="email" name="email" required
+                    class="spotify-input w-full px-4 py-2 rounded-md focus:outline-none"
+                    placeholder="ornek@mail.com">
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-black uppercase mb-1 tracking-widest text-gray-400">Şifre</label>
+                <input type="password" name="password" required
+                    class="spotify-input w-full px-4 py-2 rounded-md focus:outline-none"
+                    placeholder="En az 6 karakter">
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-black uppercase mb-1 tracking-widest text-gray-400">Şifre Tekrar</label>
+                <input type="password" name="password_check" required
+                    class="spotify-input w-full px-4 py-2 rounded-md focus:outline-none"
+                    placeholder="Şifrenizi tekrar giriniz">
+            </div>
+
+            <button type="submit" 
+                class="btn-spotify w-full bg-spotify-green text-black font-black py-4 rounded-full shadow-lg mt-6 uppercase tracking-widest text-sm">
+                Kayıt Ol
+            </button>
+        </form>
+
+        <div class="mt-8 pt-6 border-t border-[#282828] text-center">
+            <p class="text-gray-500 text-sm font-bold">
+                Zaten bir hesabın var mı? 
+                <a href="/login" class="text-white hover:spotify-green hover:underline ml-1">Giriş Yap</a>
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>

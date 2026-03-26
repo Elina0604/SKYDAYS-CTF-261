@@ -1,0 +1,12 @@
+services:
+  CloudOps-Breach:
+    container_name: CloudOps-Breach
+    build: .
+    restart: unless-stopped
+    image: CloudOps-Breach
+    networks: 
+      - ctf-network
+
+networks: 
+  ctf-network:
+    external: true
