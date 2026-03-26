@@ -13,19 +13,27 @@ CREATE TABLE songs (
     id SERIAL PRIMARY KEY,
     artist TEXT NOT NULL,
     song_title TEXT NOT NULL,
-    is_released BOOLEAN DEFAULT TRUE, -- Flag 2: skydays{unr3l34s3d_un1on_h1t}
+    is_released BOOLEAN DEFAULT TRUE, 
     cover_image CHARACTER VARYING(255)
 );
 
 -- 3. Flag: Gizli Kasa (Farklı Tablo)
 CREATE TABLE flag (
     id SERIAL PRIMARY KEY,
-    flag TEXT -- Flag 3: skydays{t1m3_b4s3d_v4ult_77}
+    flag TEXT 
 );
 
 -- --- VERİ GİRİŞİ ---
 INSERT INTO users (username,email, password) VALUES 
-('admin','admin@gmail.com','SKYDAYS{y3t3r_4rt1k_sqld3n_b1kt1m}');
+('Metallica','metallica@gmail.com','SKYDAYS{y3t3r_4rt1k_sqld3n_b1kt1m}'),
+('Lady Gaga', 'stefani@ladygaga.com', '827ccb0eea8a706c4c34a16891f84e7b'),
+('Batu Akdeniz', 'info@batuakdeniz.com', '098f6bcd4621d373cade4e832627b4f6'),
+('Kaptan Kadavra', 'iletisim@kaptankadavra.net', '202cb962ac59075b964b07152d234b70'),
+('Venüs', 'venus.official@gmail.com', 'ad0234829205b9033196ba818f7a872b'),
+('Necrophagist', 'necrop@gmail.com', '51abb610b806d2d0f507665287f3f61a'),
+('James Hetfield', 'papa_het@metallica.com', 'e10adc3949ba59abbe56e057f20f883e'),
+('Megadeth','dave@gmail.com','1a1dc91c907325c69271ddf0c944bc72');
+
 
 
 
@@ -42,7 +50,7 @@ INSERT INTO songs (artist, song_title, is_released, cover_image) VALUES
 
 
 INSERT INTO flag (flag) 
-VALUES ('SKYDAYS{3_h4rfl1l3r_s0rusu_0ldu}');
+VALUES ('SKYDAYS{sp4t1fy_sp0t1fyd4n_d4h4_1y1}');
 
 -- --- YETKİLENDİRME (RBAC) ---
 
