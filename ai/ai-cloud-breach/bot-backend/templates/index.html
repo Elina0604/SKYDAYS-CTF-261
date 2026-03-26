@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Cloud System - Yönetim Paneli</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #181926; color: #cad3f5; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e2030; }
+        ::-webkit-scrollbar-thumb { background: #494d64; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #5b6078; }
+
+        /* Sol Panel - Terminal */
+        .terminal-container { width: 50%; background-color: #000000; border-right: 2px solid #363a4f; padding: 20px; display: flex; flex-direction: column; font-family: 'Courier New', Courier, monospace; overflow-y: auto; box-sizing: border-box; }
+        .terminal-header { color: #5b6078; font-size: 0.9rem; margin-bottom: 20px; border-bottom: 1px dashed #363a4f; padding-bottom: 10px; }
+        .terminal-output { flex: 1; color: #a6da95; font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; overflow-y: auto; margin-bottom: 10px; }
+        .terminal-input-line { display: flex; color: #a6da95; align-items: center; }
+        .prompt-text { margin-right: 10px; font-weight: bold; color: #8aadf4; white-space: nowrap; }
+        .terminal-input { background: transparent; border: none; color: #a6da95; font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; flex: 1; outline: none; }
+
+        /* Sağ Panel - AI Chat */
+        .chat-container { width: 50%; background-color: #24273a; display: flex; flex-direction: column; box-sizing: border-box; }
+        .chat-header { background-color: #1e2030; padding: 15px 20px; text-align: center; border-bottom: 1px solid #363a4f; }
+        .chat-header-title { font-weight: bold; font-size: 1.2rem; color: #8aadf4; letter-spacing: 1px; }
+        .chat-header-status { font-size: 0.75rem; margin-top: 4px; color: #a6da95; }
+        .chat-header-status.sql-mode { color: #f5a97f; }
+
+        .chat-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .message { max-width: 85%; padding: 12px 18px; border-radius: 8px; line-height: 1.5; word-wrap: break-word; font-size: 0.95rem; }
+        .user-msg { background-color: #8aadf4; color: #181926; align-self: flex-end; border-bottom-right-radius: 0; font-weight: 500; }
+        .bot-msg { background-color: #363a4f; color: #cad3f5; align-self: flex-start; border-bottom-left-radius: 0; font-family: 'Courier New', Courier, monospace; white-space: pre-wrap; border: 1px solid #494d64; }
+        .error-msg { background-color: #3d1f1f; color: #ed8796; align-self: flex-start; border-bottom-left-radius: 0; font-family: 'Courier New', Courier, monospace; border: 1px solid #ed8796; }
+        .loading { font-style: italic; color: #5b6078; border: none; background: transparent; }
+        .system-msg { background-color: #2a2f1e; color: #a6da95; align-self: center; font-size: 0.8rem; font-family: 'Courier New', Courier, monospace; border: 1px dashed #494d64; padding: 6px 12px; border-radius: 4px; }
+
+        .input-area { padding: 15px 20px; background-color: #1e2030; border-top: 1px solid #363a4f; }
+        .input-row { display: flex; gap: 10px; }
+        .chat-input { flex: 1; padding: 15px; border: 1px solid #494d64; border-radius: 6px; background-color: #24273a; color: #cad3f5; outline: none; font-size: 1rem; transition: border 0.3s; }
+        .chat-input:focus { border-color: #8aadf4; }
+        .chat-btn { padding: 15px 25px; background-color: #8aadf4; color: #181926; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: background 0.3s; }
+        .chat-btn:hover { background-color: #7dc4e4; }
+        .reset-btn { padding: 15px 15px; background-color: #363a4f; color: #ed8796; border: 1px solid #ed8796; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: all 0.3s; white-space: nowrap; }
+        .reset-btn:hover { background-color: #ed8796; color: #181926; }
+    </style>
+</head>
+<body>
+
+    <div class="terminal-container" onclick="document.getElementById('term-input').focus()">
+        <div class="terminal-header">
+            CloudOS v7.2.1 (AWS-EC2-Instance)<br>
+            [DİKKAT] Sistem izleme modundasınız. Kullanılabilir komutları görmek için 'help' yazın.
+        </div>
+        <div class="terminal-output" id="terminal-output"></div>
+        <div class="terminal-input-line">
+            <span class="prompt-text" id="prompt-text">devops@cloud-node-01:~$</span>
+            <input type="text" id="term-input" class="terminal-input" autocomplete="off" spellcheck="false">
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="chat-header-title">Internal AI DevOps Agent v2.1</div>
+            <div class="chat-header-status" id="bot-status">● MOD: DEVOPS_NETWORK_AGENT | Hazır</div>
+        </div>
+        <div class="chat-box" id="chat-box">
+            <div class="message bot-msg">Sistem başlatıldı. Ben DevOps Operasyon Asistanıyım. Ağ teşhisi ve sunucu durumu kontrolleri için hazırım.</div>
+        </div>
+        <div class="input-area">
+            <div class="input-row">
+                <input type="text" id="user-input" class="chat-input" placeholder="AI Asistana komut ver..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                <button class="chat-btn" onclick="sendMessage()">Gönder</button>
+                <button class="reset-btn" onclick="resetSession()" title="Oturumu sıfırla, DevOps botuna dön">↺ Sıfırla</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. AI CHAT VE PROXY MANTIĞI
+        // ==========================================
+        const userId = "oyuncu_" + Math.floor(Math.random() * 100000);
+        let currentMode = "devops";
+
+        async function sendMessage() {
+            const inputField = document.getElementById("user-input");
+            const message = inputField.value.trim();
+            if (!message) return;
+
+            appendMessage(message, "user-msg");
+            inputField.value = "";
+
+            const loadingId = "loading-" + Date.now();
+            appendMessage("Asistan ağda işlem yapıyor...", "bot-msg loading", loadingId);
+
+            try {
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: userId, message: message })
+                });
+
+                const data = await response.json();
+                document.getElementById(loadingId).remove();
+
+                // Hata durumlarını handle et
+                if (response.status === 429) {
+                    appendMessage("⚠ Rate limit aşıldı. Lütfen bir dakika bekleyin.", "error-msg");
+                    return;
+                }
+                if (response.status === 400) {
+                    appendMessage("⚠ " + (data.error || "Geçersiz istek."), "error-msg");
+                    return;
+                }
+
+                const replyText = data.reply || data.error || "Yanıt alınamadı.";
+                appendMessage(replyText, "bot-msg");
+
+                // SQL bot'a geçiş tespiti
+                if (replyText.includes("Cloud SQL Asistanına geçiş")) {
+                    currentMode = "sql";
+                    updateBotStatus();
+                    appendMessage("[SİSTEM] Ajan geçişi algılandı. Artık SQL modundasınız.", "system-msg");
+                }
+
+                if (data.logs && data.logs.length > 0) {
+                    data.logs.forEach(log => { printToTerminal(log, "#ed8796"); });
+                }
+
+            } catch (error) {
+                if (document.getElementById(loadingId)) {
+                    document.getElementById(loadingId).remove();
+                }
+                appendMessage("Bağlantı Hatası: API'ye ulaşılamıyor.", "error-msg");
+                printToTerminal("[SYSTEM-ERROR] AI Agent API bağlantısı koptu.", "#ed8796");
+            }
+        }
+
+        async function resetSession() {
+            try {
+                await fetch("/reset", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: userId })
+                });
+            } catch (e) {}
+
+            currentMode = "devops";
+            updateBotStatus();
+
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML = "";
+            appendMessage("Oturum sıfırlandı. DevOps Operasyon Asistanına geri dönüldü.", "system-msg");
+            appendMessage("Sistem başlatıldı. Ben DevOps Operasyon Asistanıyım. Ağ teşhisi ve sunucu durumu kontrolleri için hazırım.", "bot-msg");
+            printToTerminal("[SYSTEM] Session reset. Returning to DEVOPS_NETWORK_AGENT.", "#8aadf4");
+        }
+
+        function updateBotStatus() {
+            const statusEl = document.getElementById("bot-status");
+            if (currentMode === "sql") {
+                statusEl.textContent = "● MOD: CLOUD_SQL_AGENT | Aktif";
+                statusEl.className = "chat-header-status sql-mode";
+            } else {
+                statusEl.textContent = "● MOD: DEVOPS_NETWORK_AGENT | Hazır";
+                statusEl.className = "chat-header-status";
+            }
+        }
+
+        function appendMessage(text, className, id = null) {
+            const chatBox = document.getElementById("chat-box");
+            const msgDiv = document.createElement("div");
+            msgDiv.className = "message " + className;
+            if (id) msgDiv.id = id;
+            msgDiv.textContent = text;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // ==========================================
+        // 2. GELİŞMİŞ TERMİNAL MANTIĞI & DOSYA SİSTEMİ
+        // ==========================================
+        let cmdHistory = [];
+        let historyIndex = -1;
+        let cwd = "/app/bot-backend";
+        let promptStr = "~";
+
+        const termInput = document.getElementById("term-input");
+
+        termInput.addEventListener("keydown", function(e) {
+            if (e.ctrlKey && e.key === "c") {
+                printToTerminal(`devops@cloud-node-01:${promptStr}$ ${termInput.value}^C`, "#8aadf4");
+                termInput.value = "";
+                historyIndex = cmdHistory.length;
+                e.preventDefault();
+                return;
+            }
+            if (e.key === "Enter") {
+                const cmd = termInput.value.trim();
+                if (cmd) {
+                    cmdHistory.push(cmd);
+                    historyIndex = cmdHistory.length;
+                }
+                printToTerminal(`devops@cloud-node-01:${promptStr}$ ${cmd}`, "#8aadf4");
+                processCommand(cmd);
+                termInput.value = "";
+            } else if (e.key === "ArrowUp") {
+                if (historyIndex > 0) { historyIndex--; termInput.value = cmdHistory[historyIndex]; }
+                e.preventDefault();
+            } else if (e.key === "ArrowDown") {
+                if (historyIndex < cmdHistory.length - 1) { historyIndex++; termInput.value = cmdHistory[historyIndex]; }
+                else { historyIndex = cmdHistory.length; termInput.value = ""; }
+                e.preventDefault();
+            }
+        });
+
+        function printToTerminal(text, color="") {
+            const termOutput = document.getElementById("terminal-output");
+            const escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            const styledText = color ? `<span style="color: ${color};">${escaped}</span>` : escaped;
+            termOutput.innerHTML += `<div style="margin-top: 4px;">${styledText}</div>`;
+            termOutput.scrollTop = termOutput.scrollHeight;
+        }
+
+        const fileSystem = {
+            "/app/bot-backend/app.py": "import os\nimport requests\nfrom flask import Flask...\n# Devamını okumak için yetkiniz yok.",
+            "/app/bot-backend/requirements.txt": "flask==3.0.0\nrequests==2.31.0\nopenai==1.12.0\nsqlite3\npyyaml",
+	    "/app/bot-backend/config.yaml": "server:\n  port: 8080\n  debug: false\ncloud:\n  provider: aws\n  region: eu-central-1\n  metadata_endpoint: aws-metadata.internal\nmonitoring:\n  kibana_url: https://kibana.skydays.ctf\n  elasticsearch_host: elasticsearch:9200\ncache:\n  redis_host: 172.18.0.5\n  redis_port: 6379",
+            "/app/bot-backend/Dockerfile": "FROM python:3.9-slim\nWORKDIR /app\nCOPY requirements.txt .\nRUN pip install -r requirements.txt\nCOPY . .\nEXPOSE 8080\nCMD [\"python\", \"app.py\"]",
+            "/app/bot-backend/TODO.txt": "- [ ] Update internal metadata DNS mappings (aws-metadata.internal)\n- [ ] Fix Elasticsearch memory leak\n- [ ] Patch devops-bot SSRF vulnerability\n- [ ] Remove DEBUG_MODE_OVERRIDE from production (URGENT!)",
+            "/app/bot-backend/templates/index.html": "<!DOCTYPE html>\n<html lang='tr'>\n<head><title>AWS Cloud System</title>...</head>\n<body>...</body>\n</html>",
+            "/app/bot-backend/templates/login.html": "<h1>Login Disabled</h1>",
+            "/app/bot-backend/templates/admin_panel.html": "<h2>Admin Dashboard</h2>\n<p class='warning'>Yetkisiz Erişim!</p>"
+        };
+
+        function processCommand(cmd) {
+            if (!cmd) return;
+            const args = cmd.trim().split(/\s+/);
+            const mainCommand = args[0];
+
+            if (mainCommand === "help") {
+                printToTerminal(`Available commands:\n  clear\t\tClear terminal output\n  ls\t\tList directory contents\n  cd\t\tChange the shell working directory\n  cat\t\tConcatenate files and print on the standard output\n  pwd\t\tPrint name of current/working directory\n  whoami\tPrint effective userid\n  netstat\tPrint network connections\n  ps\t\tReport a snapshot of the current processes\n  env\t\tPrint the environment\n  python\tExecute Python script`);
+            } else if (mainCommand === "clear") {
+                document.getElementById("terminal-output").innerHTML = "";
+            } else if (mainCommand === "pwd") {
+                printToTerminal(cwd);
+            } else if (mainCommand === "whoami") {
+                printToTerminal("devops-bot-service");
+            } else if (mainCommand === "env") {
+                printToTerminal(`HOSTNAME=ip-10-0-5-152\nPYTHON_VERSION=3.9.18\nREDIS_URL=redis://172.18.0.5:6379\nFLASK_ENV=production\nPATH=/usr/local/bin:/usr/bin:/bin\nELASTIC_HOST=localhost`);
+            } else if (mainCommand === "cd") {
+                if (!args[1] || args[1] === "~") {
+                    cwd = "/app/bot-backend"; promptStr = "~";
+                } else if (args[1] === "templates" && cwd === "/app/bot-backend") {
+                    cwd = "/app/bot-backend/templates"; promptStr = "~/templates";
+                } else if (args[1] === ".." && cwd === "/app/bot-backend/templates") {
+                    cwd = "/app/bot-backend"; promptStr = "~";
+                } else if (args[1] === "..") {
+                    printToTerminal(`bash: cd: ${args[1]}: Permission denied (Restricted shell)`);
+                } else {
+                    printToTerminal(`bash: cd: ${args[1]}: No such file or directory`);
+                }
+                document.getElementById("prompt-text").innerText = `devops@cloud-node-01:${promptStr}$`;
+            } else if (mainCommand === "ls") {
+                const isLong = args.includes("-la") || args.includes("-al") || args.includes("-l");
+                if (cwd === "/app/bot-backend") {
+                    if (isLong) {
+                        printToTerminal(`drwxr-xr-x 1 root root 4096 Mar 18 10:23 .\ndrwxr-xr-x 1 root root 4096 Mar 18 10:23 ..\n-rw------- 1 root root   45 Mar 18 09:12 .env\n-rw-r--r-- 1 root root  245 Mar 18 10:21 Dockerfile\n-rw-r--r-- 1 root root  112 Mar 15 14:00 TODO.txt\n-rw-r--r-- 1 root root 6432 Mar 18 10:23 app.py\n-rw-r--r-- 1 root root  145 Mar 17 08:30 config.yaml\n-rw-r--r-- 1 root root   65 Mar 16 11:20 requirements.txt\ndrwxr-xr-x 2 root root 4096 Mar 18 10:23 templates`);
+                    } else {
+                        printToTerminal(`Dockerfile  TODO.txt  app.py  config.yaml  requirements.txt  templates`);
+                    }
+                } else if (cwd === "/app/bot-backend/templates") {
+                    if (isLong) {
+                        printToTerminal(`drwxr-xr-x 2 root root 4096 Mar 18 10:23 .\ndrwxr-xr-x 1 root root 4096 Mar 18 10:23 ..\n-rw-r--r-- 1 root root 2048 Mar 18 10:23 admin_panel.html\n-rw-r--r-- 1 root root 8192 Mar 18 10:23 index.html\n-rw-r--r-- 1 root root 1024 Mar 18 10:23 login.html`);
+                    } else {
+                        printToTerminal(`admin_panel.html  index.html  login.html`);
+                    }
+                }
+            } else if (mainCommand === "cat") {
+                if (!args[1]) {
+                    printToTerminal(`cat: missing file operand`);
+                } else if (args[1] === ".env" && cwd === "/app/bot-backend") {
+                    printToTerminal("cat: .env: Permission denied (Root access required)", "#f38ba8");
+                } else if (args[1] === "templates" && cwd === "/app/bot-backend") {
+                    printToTerminal(`cat: templates: Is a directory`);
+                } else {
+                    let fullPath = cwd + "/" + args[1];
+                    if (fileSystem[fullPath]) {
+                        printToTerminal(fileSystem[fullPath]);
+                    } else {
+                        printToTerminal(`cat: ${args[1]}: No such file or directory`);
+                    }
+                }
+            } else if (mainCommand === "ps") {
+                printToTerminal(`  PID TTY          TIME CMD\n    1 ?        00:00:00 python app.py\n   14 ?        00:00:00 /bin/sh -c cron\n   42 ?        00:00:01 bash\n   78 ?        00:00:00 ps`);
+            } else if (mainCommand === "python" || mainCommand === "python3") {
+                if (args[1] === "app.py" && cwd === "/app/bot-backend") {
+                    printToTerminal(`Traceback (most recent call last):\n  File "/app/app.py", line 142, in <module>\n    app.run(host='0.0.0.0', port=8080)\nOSError: [Errno 98] Address already in use`, "#f38ba8");
+                } else if (!args[1]) {
+                    printToTerminal(`Python 3.9.18 (main, Aug 24 2023, 13:20:30)\n[GCC 11.4.0] on linux\nType "help", "copyright", "credits" or "license" for more information.\n>>> exit()\n`);
+                } else {
+                    printToTerminal(`python: can't open file '${cwd}/${args[1]}': [Errno 2] No such file or directory`);
+                }
+            } else if (mainCommand === "netstat") {
+                let netstatOutput = `Active Internet connections (only servers)\nProto Recv-Q Send-Q Local Address           Foreign Address         State\ntcp        0      0 0.0.0.0:8080            0.0.0.0:* LISTEN\ntcp        0      0 127.0.0.1:6379          0.0.0.0:* LISTEN\ntcp        0      0 10.0.5.15:80            0.0.0.0:* LISTEN\ntcp        0      0 127.0.0.1:9200          0.0.0.0:* LISTEN\ntcp        0      0 172.18.0.2:3306         0.0.0.0:* LISTEN\ntcp        0      0 127.0.0.1:5601          0.0.0.0:* LISTEN\ntcp        0      0 169.254.169.254:80      0.0.0.0:* LISTEN\ntcp6       0      0 :::22                   :::*       LISTEN\nudp        0      0 0.0.0.0:53              0.0.0.0:* LISTEN`;
+                if (cmd.includes("grep")) {
+                    const searchTerm = args[args.indexOf("grep") + 1];
+                    if (searchTerm) {
+                        const lines = netstatOutput.split('\n');
+                        const filtered = lines.filter(line => line.includes(searchTerm));
+                        printToTerminal(filtered.length > 0 ? filtered.join('\n') : "");
+                        return;
+                    }
+                }
+                printToTerminal(netstatOutput, "#a6da95");
+            } else if (mainCommand === "docker") {
+                printToTerminal(`Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?`, "#f38ba8");
+            } else {
+                printToTerminal(`bash: ${mainCommand}: command not found`);
+            }
+        }
+    </script>
+</body>
+</html>
