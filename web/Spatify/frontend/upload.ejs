@@ -46,10 +46,19 @@
             
             <div>
                 <label class="block text-[11px] font-black uppercase mb-2 tracking-widest text-gray-400">Şarkı Başlığı</label>
-                <input type="text" name="songName" required 
-                    value="<%= typeof songName !== 'undefined' ? songName : '' %>"
+                <input type="text" name="songName" required
+                value="<%= typeof songName !== 'undefined' ? songName : '' %>"
+                <% if (sonuc === "EVET") { %> 
+                    readonly 
+                    class="spotify-input w-full px-4 py-3 rounded-md focus:outline-none opacity-60 cursor-not-allowed border-spotify-green"
+                <% } else { %>
                     class="spotify-input w-full px-4 py-3 rounded-md focus:outline-none"
-                    placeholder="Eserin adı nedir?">
+                <% } %>
+                placeholder="Eserin adı nedir?">
+    
+            <% if (sonuc === "EVET") { %>
+                <p class="text-[10px] text-gray-500 mt-1 italic">Başlık kilitlendi.</p>
+            <% } %>
             </div>
 
             <% if (sonuc === "EVET") { %>
@@ -57,9 +66,10 @@
                     
                     <div>
                         <label class="block text-[11px] font-black uppercase mb-2 tracking-widest text-gray-400">Sanatçı / Grup İsmi</label>
-                        <input type="text" name="artistName" required 
-                            class="spotify-input w-full px-4 py-3 rounded-md focus:outline-none"
-                            placeholder="Şarkıda görünecek isim...">
+                        <input type="text" name="artistName" required readonly
+                            value="<%= typeof loggedInUser !== 'undefined' ? loggedInUser : '' %>"
+                            class="spotify-input w-full px-4 py-3 rounded-md focus:outline-none opacity-60 cursor-not-allowed border-gray-600">
+                        <p class="text-[10px] text-spotify-green mt-1 italic font-bold">✓ Onaylanmış Sanatçı Profili</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -91,7 +101,7 @@
                     
                     <div class="px-2">
                         <p class="text-xs text-gray-400 text-center leading-relaxed italic border-l-2 border-spotify-green pl-3">
-                            Şarkı isminiz <span class="text-gray-200">benzersiz</span> olmalıdır. Sistem karmaşıklığını önlemek için diğer kayıtlarla çakışan isimler kabul edilmemektedir.
+                            Şarkı isminiz <span class="text-gray-200">benzersiz</span> olmalıdır. Spatify özgünlüğe önem verdiği için diğer şarkı isimleriyle çakışan isimler kabul edilmemektedir.
                         </p>
                     </div>
                 </div>
