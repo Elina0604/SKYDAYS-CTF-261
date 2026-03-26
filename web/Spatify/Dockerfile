@@ -1,20 +1,23 @@
-# 1. Aşama: Temel İmajı Seçiyoruz
 FROM node:18-slim
 
-# 2. Aşama: Çalışma Klasörünü Belirliyoruz
 WORKDIR /app
 
-# 3. Aşama: Paket Listesini Kopyalıyoruz
+# 1. Önce paket listelerini kopyala
 COPY package*.json ./
 
-# 4. Aşama: Modülleri Kuruyoruz
+# 2. Root olarak kurulumu yap (Hızlı olur)
 RUN npm install
 
-# 5. Aşama: Tüm Kodlarımızı İçeri Alıyoruz
+# 3. Tüm proje dosyalarını içeri al
 COPY . .
 
-# 6. Aşama: Kapıyı Aralıyoruz
+# 4. KRİTİK ADIM: Klasörlerin sahipliğini 'node' kullanıcısına devret
+# Bunu COPY . . komutundan SONRA yapmalısın ki içeri giren dosyalar da node'un olsun
+RUN chown -R node:node /app
+
+# 5. Artık root yetkisini bırakıp güvenli kullanıcıya geçiyoruz
+USER node
+
 EXPOSE 3000
 
-# 7. Aşama: Motoru Çalıştırıyoruz
 CMD ["node", "server.js"]
