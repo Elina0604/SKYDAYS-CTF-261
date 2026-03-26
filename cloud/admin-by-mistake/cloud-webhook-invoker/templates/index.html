@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Webhook Invoker</title>
+    <style>
+        :root {
+            --bg-body: #f2f3f3;
+            --bg-nav: #232f3e;
+            --bg-card: #ffffff;
+            --text-main: #16191f;
+            --text-nav: #ffffff;
+            --text-muted: #545b64;
+            --primary-orange: #ff9900;
+            --primary-orange-hover: #e88b00;
+            --border-color: #eaeded;
+            --border-focus: #0073bb;
+            --result-bg: #fafafa;
+        }
+
+        body {
+            font-family: "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: var(--bg-nav);
+            color: var(--text-nav);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .navbar-icon {
+            color: var(--primary-orange);
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+        }
+
+        .navbar-menu span {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 2px;
+        }
+
+        .navbar-menu span:hover {
+            outline: 1px solid var(--text-nav);
+        }
+
+        .sub-nav {
+            background-color: #0f1b2a;
+            color: #d1d5db;
+            padding: 8px 24px;
+            font-size: 0.85rem;
+            display: flex;
+            gap: 20px;
+        }
+
+        .sub-nav-item {
+            cursor: pointer;
+        }
+
+        .sub-nav-item:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .breadcrumbs {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .breadcrumbs span {
+            cursor: pointer;
+        }
+
+        .breadcrumbs span:hover {
+            text-decoration: underline;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 300;
+            margin: 0 0 8px 0;
+            color: var(--text-main);
+        }
+
+        .page-description {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 24px;
+            box-shadow: 0 1px 1px 0 rgba(0,28,36,.03), 1px 1px 1px 0 rgba(0,28,36,.03), -1px 1px 1px 0 rgba(0,28,36,.03);
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+            color: var(--text-main);
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+
+        .label-hint {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: normal;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px 12px;
+            background-color: #ffffff;
+            border: 1px solid #aab7b8;
+            border-radius: 2px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            box-sizing: border-box;
+            transition: border-color 0.1s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 1px var(--border-focus);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        button {
+            background-color: var(--primary-orange);
+            color: #111;
+            border: 1px solid #a6a6a6;
+            padding: 6px 16px;
+            border-radius: 2px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.1s;
+            box-shadow: 0 1px 0 rgba(255,255,255,.6) inset;
+        }
+
+        button:hover {
+            background-color: var(--primary-orange-hover);
+        }
+
+        button.secondary {
+            background-color: #ffffff;
+            color: #111;
+        }
+
+        button.secondary:hover {
+            background-color: #f3f3f3;
+        }
+
+        .result-container {
+            margin-top: 24px;
+        }
+
+        .result-box {
+            background: var(--result-bg);
+            border: 1px solid #d5dbdb;
+            border-radius: 2px;
+            padding: 16px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .footer {
+            background-color: #ffffff;
+            border-top: 1px solid var(--border-color);
+            padding: 16px 24px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="navbar-brand">
+        <span class="navbar-icon">☁</span>
+        <span>Cloud Webhook Services</span>
+    </div>
+    <div class="navbar-menu">
+        <span>Services</span>
+        <span>Search</span>
+        <span>[Alt+S]</span>
+        <span>CloudShell</span>
+        <span>Global</span>
+        <span>User</span>
+    </div>
+</div>
+<div class="sub-nav">
+    <span class="sub-nav-item">Webhooks</span>
+    <span class="sub-nav-item">API Destinations</span>
+    <span class="sub-nav-item">Events</span>
+</div>
+
+<div class="main-content">
+    <div class="page-header">
+        <div class="breadcrumbs">
+            <span>Cloud Services</span> &gt; <span>Webhooks</span> &gt; <span>Create Webhook Invocation</span>
+        </div>
+        <h1 class="page-title">Configure Webhook Invocation</h1>
+        <p class="page-description">Use this interface to configure and test an external webhook URL that will be triggered upon specific cloud events. The service will send an HTTP GET request to the specified endpoint. Need to manage access? Visit <a href="https://iam.justcloud.skydays.ctf" style="color: var(--border-focus); text-decoration: none;">iam.justcloud.skydays.ctf</a>.</p>
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">Endpoint Configuration</h2>
+        <form action="/" method="POST">
+            <div class="form-group">
+                <label for="url">Target URL</label>
+                <span class="label-hint">Enter the fully qualified URL of your webhook receiver. Ensure the endpoint is publicly accessible or reachable from within your VPC.</span>
+                <input type="text" id="url" name="url" placeholder="http://example.com/api/webhook" required>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="secondary" onclick="document.getElementById('url').value=''">Cancel</button>
+                <button type="submit">Test Webhook Endpoint</button>
+            </div>
+        </form>
+    </div>
+
+    {% if result %}
+    <div class="card result-container">
+        <h2 class="card-title">Invocation Result</h2>
+        <p class="label-hint" style="margin-bottom: 12px;">The response from the target endpoint is displayed below.</p>
+        <div class="result-box">{{ result }}</div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="footer">
+    &copy; 2026 Cloud Services Provider. All rights reserved. | Privacy Policy | Terms of Service
+</div>
+
+</body>
+</html>

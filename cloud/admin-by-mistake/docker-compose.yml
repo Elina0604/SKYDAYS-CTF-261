@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  cloud-webhook-invoker:
+    build: ./cloud-webhook-invoker
+    container_name: cloud-webhook-invoker
+    read_only: true
+    security_opt:
+      - "no-new-privileges:true"
+    networks:
+      - ctf-network
+    tmpfs:
+      - /tmp
+    restart: always
+
+  cloud-identity-portal:
+    build: ./cloud-identity-portal
+    container_name: cloud-identity-portal
+    read_only: true
+    security_opt:
+      - "no-new-privileges:true"
+    networks:
+      - ctf-network
+    tmpfs:
+      - /tmp
+    restart: always
+
+  cloud-k8s-api:
+    build: ./cloud-k8s-api
+    container_name: cloud-k8s-api
+    read_only: true
+    security_opt:
+      - "no-new-privileges:true"
+    networks:
+      - ctf-network
+    tmpfs:
+      - /tmp
+    restart: always
+
+  cloud-other-services:
+    build: ./cloud-other-services
+    container_name: cloud-other-services
+    security_opt:
+      - "no-new-privileges:true"
+    networks:
+      ctf-network:
+        aliases:
+          - cloud-metadata-service
+          - cloud-apache-server
+          - cloud-internal-redis
+          - cloud-internal-vault
+          - cloud-log-store
+          - cloud-analytics-engine
+          - cloud-user-db
+          - cloud-deep-archive
+    restart: always
+
+networks:
+  ctf-network:
+    name: ctf-network
+    external: true
