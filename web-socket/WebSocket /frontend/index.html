@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat CTF</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-container" id="loginContainer">
+            <div class="login-box">
+                <i class="fas fa-user-circle avatar"></i>
+                <h2>Chat'e Katıl</h2>
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Tüm sorularınız için <strong>SkyLab_Admin</strong> hesabına mesaj gönderebilirsiniz. Size en kısa sürede yardımcı olacaktır.</p>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" placeholder="Kullanıcı adı">
+                </div>
+                <button onclick="login()">
+                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-container" id="chatContainer" style="display: none;">
+            <div class="chat-header">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="currentUser"></span>
+                </div>
+                <div class="header-actions">
+                    <i class="fas fa-users" title="Aktif Kullanıcılar"></i>
+                    <i class="fas fa-cog" title="Ayarlar"></i>
+                </div>
+            </div>
+            
+            <div class="chat-content">
+                <div class="messages" id="messages"></div>
+                
+                <div class="input-container">
+                    <div class="recipient-container">
+                        <i class="fas fa-at"></i>
+                        <input type="text" id="recipient" placeholder="Alıcı">
+                    </div>
+                    <div class="message-input-container">
+                        <input type="text" id="message" placeholder="Mesajınızı yazın...">
+                        <button onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html> 
