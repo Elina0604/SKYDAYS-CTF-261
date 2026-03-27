@@ -198,18 +198,20 @@ Hazırlanan manifest dosyası Kubernetes API'sine uygulanır:
 kubectl --kubeconfig kubeconfig.yaml apply -f exploit.yaml
 ```
 
-RoleBinding'in başarıyla oluşturulduğunu belirten `rolebinding.rbac.authorization.k8s.io/exploit-binding created` çıktısı alındıktan sonra, sistem üzerinde yönetici (`admin`) haklarına ulaşıldığı doğrulanmış olur.
+Çıktıda RoleBinding'in başarıyla oluşturulduğu (`rolebinding.rbac.authorization.k8s.io/exploit-binding-... created`) görülür. Ancak sistem, standart bir Kubernetes ortamından farklı olarak yetkileri anında yansıtmaz. Bunun yerine arka planda oluşturulan kaynağa gizli bir ipucu bırakır. 
 
-Artık engellenmiş olan `secrets` kaynağına erişim sağlanabilir:
+Bu ipucunu ve geçici yetkiyi bulmak için oluşturulan RoleBinding'lerin detayları YAML formatında incelenir:
 
 ```bash
-kubectl --kubeconfig kubeconfig.yaml get secrets -n nebula-system
+kubectl --kubeconfig kubeconfig.yaml get rolebindings -o yaml
 ```
 
-Çıktıda `terraform-backend-state` isimli bir sırrın bulunduğu görülür. Bu sırrın içeriği `-o json` parametresi kullanılarak dışa aktarılır:
+Çıktıdaki `metadata.annotations` kısmında, `skydays/hint` başlığı altında tek kullanımlık bir geçici admin token'ı (örneğin: `admin-tmp-token-xyz...`) verildiği tespit edilir. 
+
+Artık bu geçici token kullanılarak, normalde engellenmiş olan `secrets` kaynağına JSON formatında erişim sağlanabilir. *(Not: Hedef sistem mimarisi gereği tekil bir sırra istek atıldığında 404 döndürdüğü için tüm secrets listesi çekilir)*:
 
 ```bash
-kubectl --kubeconfig kubeconfig.yaml get secret terraform-backend-state -n nebula-system -o json
+kubectl --kubeconfig kubeconfig.yaml --token="<BULUNAN_TOKEN_BURAYA_YAZILACAK>" get secrets -n nebula-system -o json
 ```
 
 Elde edilen JSON verisindeki `terraform.tfstate` anahtarının değeri Base64 ile kodlanmıştır. Bu değer çözüldüğünde, sistemin altyapısını tanımlayan gerçek bir Terraform State dosyası ile karşılaşılır. Dosya içerisindeki `outputs` bloğu incelendiğinde final bayrağı elde edilir:
@@ -224,3 +226,5 @@ Elde edilen JSON verisindeki `terraform.tfstate` anahtarının değeri Base64 il
 ```
 
 **Nihai Bayrak:** `SKYDAYS{th3r35_n0_cl0ud_1ts_jU5t_50m30n3_eL5e5_c0mPUt3R_8a9b}`
+```
+
