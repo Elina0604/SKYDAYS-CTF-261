@@ -1,7 +1,5 @@
 # My Password Vault
 
----
-
 **Kategori:** Reverse
 
 **Zorluk:** Easy-Medium
