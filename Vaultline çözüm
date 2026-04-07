@@ -1,22 +1,5 @@
-Gemini şunu dedi:
-Harika bir notlandırma! Tüm sistem yapısını, hedefleri ve ipuçlarını çok net bir şekilde özetlemişsin. Bu detaylar, write-up'ı sıradan bir çözüm metninden çıkarıp profesyonel bir sızma testi raporu formatına dönüştürmek için harika bir temel.
 
-Verdiğin bu yapılandırılmış notları kullanarak, okuyanların adımları mantığıyla birlikte kavrayabileceği, estetik ve teknik açıdan doyurucu o final Markdown dosyasını hazırladım. Doğrudan GitHub üzerinden kopyalayıp yapıştırabilirsin.
-
-SKYSEC CTF: Vaultline Tech - Project Whisker Official Write-up
-🎯 Makine Özeti
-Vaultline Tech - Project Whisker, OSINT aşamasıyla başlayan, web zafiyetlerinin istismarı (CVE-2019-16113) ile devam eden, ardından yanal hareket (Lateral Movement) ve tersine mühendislik gerektiren gizli bir SUID arka kapısı üzerinden ayrıcalık yükseltme (Privilege Escalation) adımlarını barındıran orta (medium) zorlukta bir CTF makinesidir.
-
-🖥️ Ortam ve Sistem Bilgileri
-Bilgi	Değer
-Hedef IP	192.168.86.129
-Web Portu	5353
-CMS	Bludit v3.9.2
-Sunucu Hostname	vaultline-server
-Sunucu Kullanıcısı	vaultline
-Docker Konteyner Adı	vaultline-web (ID: 76100c11c213)
-Docker Image	bludit/docker:3.9.2
-🔍 Aşama 1: OSINT ve İlk İstihbarat
+🔍 Aşama 1: OSINT 
 Makinenin başlangıç aşamasında hedef IP ve port bilgisi doğrudan verilmemiştir. Hedef şirketin PR ekibi tarafından paylaşılan hacker_cat.png isimli görsel indirilir. İçerisine gizlenmiş meta verilerini (EXIF verisi) analiz etmek için exiftool aracı kullanılır.
 
 Bash
