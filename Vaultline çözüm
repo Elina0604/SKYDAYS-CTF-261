@@ -1,0 +1,94 @@
+Gemini şunu dedi:
+Harika bir notlandırma! Tüm sistem yapısını, hedefleri ve ipuçlarını çok net bir şekilde özetlemişsin. Bu detaylar, write-up'ı sıradan bir çözüm metninden çıkarıp profesyonel bir sızma testi raporu formatına dönüştürmek için harika bir temel.
+
+Verdiğin bu yapılandırılmış notları kullanarak, okuyanların adımları mantığıyla birlikte kavrayabileceği, estetik ve teknik açıdan doyurucu o final Markdown dosyasını hazırladım. Doğrudan GitHub üzerinden kopyalayıp yapıştırabilirsin.
+
+SKYSEC CTF: Vaultline Tech - Project Whisker Official Write-up
+🎯 Makine Özeti
+Vaultline Tech - Project Whisker, OSINT aşamasıyla başlayan, web zafiyetlerinin istismarı (CVE-2019-16113) ile devam eden, ardından yanal hareket (Lateral Movement) ve tersine mühendislik gerektiren gizli bir SUID arka kapısı üzerinden ayrıcalık yükseltme (Privilege Escalation) adımlarını barındıran orta (medium) zorlukta bir CTF makinesidir.
+
+🖥️ Ortam ve Sistem Bilgileri
+Bilgi	Değer
+Hedef IP	192.168.86.129
+Web Portu	5353
+CMS	Bludit v3.9.2
+Sunucu Hostname	vaultline-server
+Sunucu Kullanıcısı	vaultline
+Docker Konteyner Adı	vaultline-web (ID: 76100c11c213)
+Docker Image	bludit/docker:3.9.2
+🔍 Aşama 1: OSINT ve İlk İstihbarat
+Makinenin başlangıç aşamasında hedef IP ve port bilgisi doğrudan verilmemiştir. Hedef şirketin PR ekibi tarafından paylaşılan hacker_cat.png isimli görsel indirilir. İçerisine gizlenmiş meta verilerini (EXIF verisi) analiz etmek için exiftool aracı kullanılır.
+
+Bash
+$ exiftool hacker_cat.png
+Çıktının alt kısımlarında, hedef sunucunun adresi ve çalıştığı port bilgisi bir yorum satırı olarak karşımıza çıkar:
+
+Comment: Vaultline Tech Dev Server: http://192.168.86.129:5353
+
+Bu aşamada hedefin web servisinin 5353 portunda çalıştığı tespit edilir.
+
+🕷️ Aşama 2: Web Keşfi ve Zafiyetin İstismarı (RCE)
+Bulunan adrese tarayıcı üzerinden gidildiğinde, sistemde Bludit CMS (v3.9.2) çalıştığı görülür.
+
+Sistemde gizli dosyaları ve dizinleri bulmak için dizin taraması (directory fuzzing) gerçekleştirilir:
+
+Bash
+$ gobuster dir -u http://192.168.86.129:5353 -w /usr/share/wordlists/dirb/common.txt
+Tarama sonucunda /dev/debug.log adresinde unutulmuş bir geliştirici log dosyası keşfedilir.
+
+/var/www/html/dev/debug.log İçeriği:
+
+Plaintext
+TODO: Vaultline Tech portalini canliya almadan once bu dizini sil! 
+Gecici test credentiallari -> admin : Vaultline_Dev26!
+Elde edilen bu kimlik bilgileriyle http://192.168.86.129:5353/admin/ adresinden panele giriş yapılır.
+
+İstismar (CVE-2019-16113):
+Bludit v3.9.2 sürümünde Directory Traversal ve RCE zafiyeti bulunmaktadır. Hazırlanan bir exploit (Python PoC veya Metasploit) ile hedefin geçici dizinine (/bl-content/tmp/temp/) sahte bir resim dosyası (evil.png - PHP shell gömülü) ve bunu tetikleyecek .htaccess yüklenir.
+
+Payload tetiklendiğinde www-data yetkisinde Docker konteynerine shell bağlantısı elde edilir.
+
+🚪 Aşama 3: Konteynerden Kaçış ve Yanal Hareket (Lateral Movement)
+www-data olarak konteynerin içinde yapılan dosya sistemi analizinde, /var/www/html/dev/ dizini altında sadece log dosyasının değil, çok kritik bir SSH özel anahtarının da (vaultline_key.bak) bırakıldığı tespit edilir.
+
+Bash
+$ ls -la /var/www/html/dev/
+-rw-r--r-- 1 www-data www-data 1675 Apr 10 10:00 debug.log
+-rw-r--r-- 1 www-data www-data 2602 Apr 10 10:00 vaultline_key.bak
+Bu anahtar ekrana yazdırılarak kopyalanır ve saldırganın yerel makinesine kaydedilir. Dosya izinleri ayarlandıktan sonra host sunucuya (ana makineye) şifresiz olarak SSH bağlantısı kurulur:
+
+Bash
+$ chmod 600 vaultline_key.bak
+$ ssh -i vaultline_key.bak vaultline@192.168.86.129
+Bağlantı başarıyla sağlandıktan sonra kullanıcının ana dizininde bulunan User Flag okunur:
+
+Bash
+vaultline@vaultline-server:~$ cat user.txt
+SKYDAYS{v4ultl1n3_1n1t14l_4cc3ss_gr4nt3d}
+🚀 Aşama 4: Yetki Yükseltme (Privilege Escalation)
+vaultline kullanıcısı ile sistem analiz edilirken, ana dizinde sahibinin root olduğu şüpheli bir çalıştırılabilir dosya (analyze_me) bulunur. Dosya çalıştırıldığında hata döndürmektedir:
+
+Bash
+vaultline@vaultline-server:~$ ./analyze_me
+Vaultline Güvenlik Protokolü Aktif. Erişim Reddedildi!
+Dosyanın arkasında yatan mantığı ve gizli metinleri çözmek için tersine mühendislik tekniklerinden olan strings aracı kullanılır:
+
+Bash
+vaultline@vaultline-server:~$ strings analyze_me
+...
+[BAZI_GEREKSIZ_METINLER]
+...
+SYSTEM_CORE_OVERRIDE: /opt/.core -p
+Çıktıda gizli bir dizin yolu gözümüze çarpar: /opt/.core. Bu dizin kontrol edildiğinde, sisteme root yetkileriyle yerleştirilmiş ve SUID biti aktif edilmiş bir bash kopyası (arka kapı) olduğu anlaşılır.
+
+SUID binary'si, orijinal root izinlerini koruyacak olan -p parametresiyle birlikte tetiklenir:
+
+Bash
+vaultline@vaultline-server:~$ /opt/.core -p
+analyze_me-root# whoami
+root
+Oturum root yetkilerine yükselmiştir! Son işlem olarak root dizinine gidilir ve nihai bayrak okunarak makine başarıyla tamamlanır:
+
+Bash
+analyze_me-root# cat /root/pfx_root.txt
+SKYDAYS{su1d_b4ckd00r_r3v3rs3_c0r3_4cc3ss}
